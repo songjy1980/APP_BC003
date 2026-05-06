@@ -1,0 +1,26 @@
+CostGroup 实际取值是什么？——在 Demo 开发前需要一份 CostGroup 唯一值列表，提前验证 AI 映射可行性
+Crane
+Freight
+Labour
+Other
+Parts
+Tools
+
+数据中是否确实没有日期列？——如果有日期但列名不同（如 "PostingDate"、"EventDate"），可手动标记；如果完全没有，需确认管理层是否接受"无时间加权"的限制
+接受"无时间加权"
+
+ExchangeRateEUR 的时点性——汇率是否已在数据准备阶段统一？还是每条记录的汇率对应不同的历史时点？
+Demo中取这些数据的平均值
+
+SiteName → 国家的映射准确性——风场名称是否可以直接推断国家？还是需要工程师在表单中手动选择国家？
+AU	澳大利亚联邦	Commonwealth of Australia
+ID	印度尼西亚共和国	Republic of Indonesia
+JP	日本国	Japan (State of Japan)
+KR	大韩民国	Republic of Korea
+NZ	新西兰	New Zealand
+PH	菲律宾共和国	Republic of the Philippines
+TH	泰王国	Kingdom of Thailand
+NC	新喀里多尼亚（法国海外领地）	New Caledonia
+CN	中华人民共和国	People's Republic of China
+PK	巴基斯坦伊斯兰共和国	Islamic Republic of Pakistan
+VN	越南社会主义共和国	Socialist Republic of Vietnam

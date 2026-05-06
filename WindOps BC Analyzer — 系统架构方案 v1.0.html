@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<!-- saved from url=(0482)https://lobechat-cloud.d35842305b91be4b48e06ff9a9ad83f5.r2.cloudflarestorage.com/code-interpreter-exports/2026-05-06/tpc_sF9TRRSjY6hY/architecture.html?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=f6ccfc7b3525564c0e473abfda403fe7%2F20260506%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260506T061928Z&X-Amz-Expires=300&X-Amz-Signature=9fb7a102ee24d324b4c4fe7c8cd06b2573d54da7d429ee8bcbfb7ced1588e273&X-Amz-SignedHeaders=host&x-id=GetObject -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WindOps BC Analyzer — 系统架构方案 v1.0</title>
+<style>
+:root {
+  --bg: #f8f9fb; --card: #fff;
+  --text: #1a1a2e; --muted: #6b7280;
+  --accent: #2563eb; --accent-light: #dbeafe;
+  --green: #059669; --green-light: #d1fae5;
+  --amber: #d97706; --amber-light: #fef3c7;
+  --red: #dc2626; --red-light: #fee2e2;
+  --purple: #7c3aed; --purple-light: #ede9fe;
+  --border: #e5e7eb; --radius: 10px;
+  --shadow: 0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.04);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.7;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 40px 24px 80px; }
+
+/* Cover */
+.cover {
+  background: linear-gradient(135deg, #1e3a5f 0%, #1e8c4e 50%, #059669 100%);
+  color: #fff; border-radius: 16px; padding: 56px 48px; margin-bottom: 40px;
+  box-shadow: 0 8px 32px rgba(5,150,105,0.18); position: relative; overflow: hidden;
+}
+.cover::after {
+  content: ""; position: absolute; top: -60px; right: -60px;
+  width: 200px; height: 200px; border-radius: 50%; background: rgba(255,255,255,0.04);
+}
+.cover .badge {
+  display: inline-block; background: #f59e0b; color: #1e3a5f; border-radius: 6px;
+  padding: 4px 14px; font-size: 13px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 12px;
+}
+.cover .label {
+  display: inline-block; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 20px; padding: 4px 14px; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 16px;
+}
+.cover h1 { font-size: 38px; font-weight: 800; margin-bottom: 8px; }
+.cover .subtitle { font-size: 17px; opacity: .85; margin-bottom: 20px; }
+.cover .meta { display: flex; gap: 32px; font-size: 14px; opacity: .75; flex-wrap: wrap; }
+
+/* TOC */
+.toc {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 32px; box-shadow: var(--shadow); margin-bottom: 40px;
+}
+.toc h2 { font-size: 20px; font-weight: 700; margin-bottom: 16px; color: var(--accent); }
+.toc ol { padding-left: 24px; }
+.toc li { margin-bottom: 8px; font-size: 15px; }
+.toc a { color: var(--accent); text-decoration: none; }
+.toc a:hover { text-decoration: underline; }
+
+/* Section */
+section { margin-bottom: 36px; }
+.section-title {
+  font-size: 22px; font-weight: 700; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-title .num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--accent); color: #fff; font-size: 15px; font-weight: 700; flex-shrink: 0;
+}
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px 32px; box-shadow: var(--shadow); margin-bottom: 20px;
+}
+.card h3 { font-size: 17px; font-weight: 700; margin-bottom: 12px; }
+.card h4 { font-size: 15px; font-weight: 700; margin: 16px 0 8px; color: #374151; }
+.card p, .card li { font-size: 15px; color: #374151; }
+.card ul { padding-left: 20px; }
+.card ul li { margin-bottom: 6px; }
+.card ul li::marker { color: var(--accent); }
+.card .sub { font-size: 13px; color: var(--muted); }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 12px 0; }
+thead th {
+  background: #f1f5f9; text-align: left; padding: 12px 14px;
+  font-weight: 700; font-size: 13px; color: #475569;
+  border-bottom: 2px solid var(--border); white-space: nowrap;
+}
+tbody td { padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: #f8fafc; }
+td.code {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 13px; color: var(--accent);
+}
+
+/* Badges */
+.badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; letter-spacing: 0.3px; }
+.badge-pick { background: var(--green-light); color: var(--green); }
+.badge-drop { background: var(--red-light); color: var(--red); }
+.badge-risk-high { background: var(--red-light); color: var(--red); }
+.badge-risk-mid { background: var(--amber-light); color: var(--amber); }
+.badge-risk-low { background: #f1f5f9; color: #64748b; }
+
+/* SQL & Code */
+pre {
+  background: #1e293b; color: #e2e8f0; border-radius: 8px; padding: 16px 20px;
+  overflow-x: auto; font-size: 13px; line-height: 1.6; margin: 12px 0;
+}
+pre.sql { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+pre code { font-family: inherit; }
+code.inline {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 13px; color: var(--accent);
+}
+
+/* Highlight */
+.highlight {
+  background: var(--accent-light); border: 1px solid rgba(37,99,235,0.2);
+  border-radius: var(--radius); padding: 18px 22px; margin: 16px 0;
+}
+.highlight strong { color: var(--accent); }
+.highlight-amber {
+  background: var(--amber-light); border: 1px solid rgba(217,119,6,0.2);
+  border-radius: var(--radius); padding: 18px 22px; margin: 16px 0;
+}
+.highlight-amber strong { color: var(--amber); }
+
+/* API Table */
+.api-method {
+  display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; min-width: 44px; text-align: center;
+}
+.api-get { background: var(--green-light); color: var(--green); }
+.api-post { background: var(--accent-light); color: var(--accent); }
+.api-put { background: var(--amber-light); color: var(--amber); }
+.api-delete { background: var(--red-light); color: var(--red); }
+
+/* Sequence diagram */
+.seq { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; line-height: 2; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid var(--border); margin: 12px 0; }
+.seq .actor { color: var(--accent); font-weight: 700; }
+
+/* Risk Matrix */
+.risk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; }
+
+/* Divider */
+hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cover { padding: 32px 24px; } .cover h1 { font-size: 26px; }
+  .card { padding: 20px; } table { font-size: 12px; }
+  thead th, tbody td { padding: 8px 10px; }
+}
+@media print {
+  .container { max-width: 100%; padding: 0; }
+  .card { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; }
+  .cover { box-shadow: none; } body { background: #fff; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ===== COVER ===== -->
+<div class="cover">
+  <div class="badge">系统架构方案 v1.0</div><br>
+  <div class="label">技术文档 · 内部审阅</div>
+  <h1>WindOps BC Analyzer</h1>
+  <div class="subtitle">风电运维商业案例智能分析工具 — 系统架构设计</div>
+  <div class="meta">
+    <span>📅 日期：2026-05-06</span>
+    <span>👤 作者：系统架构师</span>
+    <span>📋 基于：PRD v1.1</span>
+    <span>🎯 阶段：Demo 原型架构</span>
+  </div>
+</div>
+
+<!-- ===== TOC ===== -->
+<div class="toc">
+  <h2>📑 目录</h2>
+  <ol>
+    <li><a href="https://lobechat-cloud.d35842305b91be4b48e06ff9a9ad83f5.r2.cloudflarestorage.com/code-interpreter-exports/2026-05-06/tpc_sF9TRRSjY6hY/architecture.html?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&amp;X-Amz-Credential=f6ccfc7b3525564c0e473abfda403fe7%2F20260506%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20260506T061928Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=9fb7a102ee24d324b4c4fe7c8cd06b2573d54da7d429ee8bcbfb7ced1588e273&amp;X-Amz-SignedHeaders=host&amp;x-id=GetObject#s1">技术栈选型及理由</a></li>
+    <li><a href="https://lobechat-cloud.d35842305b91be4b48e06ff9a9ad83f5.r2.cloudflarestorage.com/code-interpreter-exports/2026-05-06/tpc_sF9TRRSjY6hY/architecture.html?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&amp;X-Amz-Credential=f6ccfc7b3525564c0e473abfda403fe7%2F20260506%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20260506T061928Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=9fb7a102ee24d324b4c4fe7c8cd06b2573d54da7d429ee8bcbfb7ced1588e273&amp;X-Amz-SignedHeaders=host&amp;x-id=GetObject#s2">系统架构图</a></li>
+    <li><a href="https://lobechat-cloud.d35842305b91be4b48e06ff9a9ad83f5.r2.cloudflarestorage.com/code-interpreter-exports/2026-05-06/tpc_sF9TRRSjY6hY/architecture.html?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&amp;X-Amz-Credential=f6ccfc7b3525564c0e473abfda403fe7%2F20260506%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20260506T061928Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=9fb7a102ee24d324b4c4fe7c8cd06b2573d54da7d429ee8bcbfb7ced1588e273&amp;X-Amz-SignedHeaders=host&amp;x-id=GetObject#s3">项目目录结构</a></li>
+    <li><a href="https://lobechat-cloud.d35842305b91be4b48e06ff9a9ad83f5.r2.cloudflarestorage.com/code-interpreter-exports/2026-05-06/tpc_sF9TRRSjY6hY/architecture.html?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&amp;X-Amz-Credential=f6ccfc7b3525564c0e473abfda403fe7%2F20260506%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20260506T061928Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=9fb7a102ee24d324b4c4fe7c8cd06b2573d54da7d429ee8bcbfb7ced1588e273&amp;X-Amz-SignedHeaders=host&amp;x-id=GetObject#s4">核心模块设计</a></li>
+    <li><a href="https://lobechat-cloud.d35842305b91be4b48e06ff9a9ad83f5.r2.cloudflarestorage.com/code-interpreter-exports/2026-05-06/tpc_sF9TRRSjY6hY/architecture.html?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&amp;X-Amz-Credential=f6ccfc7b3525564c0e473abfda403fe7%2F20260506%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20260506T061928Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=9fb7a102ee24d324b4c4fe7c8cd06b2573d54da7d429ee8bcbfb7ced1588e273&amp;X-Amz-SignedHeaders=host&amp;x-id=GetObject#s5">数据模型设计</a></li>
+    <li><a href="https://lobechat-cloud.d35842305b91be4b48e06ff9a9ad83f5.r2.cloudflarestorage.com/code-interpreter-exports/2026-05-06/tpc_sF9TRRSjY6hY/architecture.html?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&amp;X-Amz-Credential=f6ccfc7b3525564c0e473abfda403fe7%2F20260506%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20260506T061928Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=9fb7a102ee24d324b4c4fe7c8cd06b2573d54da7d429ee8bcbfb7ced1588e273&amp;X-Amz-SignedHeaders=host&amp;x-id=GetObject#s6">API 接口规范</a></li>
+    <li><a href="https://lobechat-cloud.d35842305b91be4b48e06ff9a9ad83f5.r2.cloudflarestorage.com/code-interpreter-exports/2026-05-06/tpc_sF9TRRSjY6hY/architecture.html?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&amp;X-Amz-Credential=f6ccfc7b3525564c0e473abfda403fe7%2F20260506%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20260506T061928Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=9fb7a102ee24d324b4c4fe7c8cd06b2573d54da7d429ee8bcbfb7ced1588e273&amp;X-Amz-SignedHeaders=host&amp;x-id=GetObject#s7">AI 集成策略</a></li>
+    <li><a href="https://lobechat-cloud.d35842305b91be4b48e06ff9a9ad83f5.r2.cloudflarestorage.com/code-interpreter-exports/2026-05-06/tpc_sF9TRRSjY6hY/architecture.html?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&amp;X-Amz-Credential=f6ccfc7b3525564c0e473abfda403fe7%2F20260506%2Fus-east-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20260506T061928Z&amp;X-Amz-Expires=300&amp;X-Amz-Signature=9fb7a102ee24d324b4c4fe7c8cd06b2573d54da7d429ee8bcbfb7ced1588e273&amp;X-Amz-SignedHeaders=host&amp;x-id=GetObject#s8">关键技术决策与权衡</a></li>
+  </ol>
+</div>
+
+<!-- ===== 1. TECH STACK ===== -->
+<section id="s1">
+  <div class="section-title"><span class="num">1</span> 技术栈选型及理由</div>
+
+  <div class="card">
+    <h3>1.1 完整技术栈总览</h3>
+    <table>
+      <thead><tr><th style="width:16%;">层次</th><th style="width:22%;">技术选择</th><th style="width:16%;">版本</th><th>选型理由</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>前端框架</strong></td>
+          <td><span class="badge badge-pick">React 18 + TypeScript</span></td>
+          <td>^18.3 + ^5.5</td>
+          <td>表单密集型应用，React 受控组件模式天然适合；TypeScript 保障 14 列字段映射的类型安全。</td>
+        </tr>
+        <tr>
+          <td><strong>构建工具</strong></td>
+          <td><span class="badge badge-pick">Vite</span></td>
+          <td>^6.x</td>
+          <td>冷启动 &lt;1s，HMR 极快；CRA 已停止维护，Vite 是事实标准。</td>
+        </tr>
+        <tr>
+          <td><strong>UI 组件库</strong></td>
+          <td><span class="badge badge-pick">Ant Design 5</span></td>
+          <td>^5.22</td>
+          <td>ProTable（5,000 行分页）、Form（7 字段 + 8 成本区）、Steps（多方案对比流程感）三者都强；中文生态成熟。</td>
+        </tr>
+        <tr>
+          <td><strong>状态管理</strong></td>
+          <td><span class="badge badge-pick">Zustand</span></td>
+          <td>^5.x</td>
+          <td>轻量无 boilerplate；selectors 防重复渲染天然解决 5,000 行表格性能问题。</td>
+        </tr>
+        <tr>
+          <td><strong>后端框架</strong></td>
+          <td><span class="badge badge-pick">FastAPI (Python)</span></td>
+          <td>^0.115</td>
+          <td>原生 async/await，直调 Ollama API 不阻塞；自动生成 OpenAPI 文档；Pydantic v2 做 14 列字段校验。</td>
+        </tr>
+        <tr>
+          <td><strong>AI 通信</strong></td>
+          <td><span class="badge badge-pick">httpx (async)</span></td>
+          <td>^0.28</td>
+          <td>FastAPI 生态首选异步 HTTP 客户端，调 <code class="inline">localhost:11434/api/chat</code> 无阻塞。</td>
+        </tr>
+        <tr>
+          <td><strong>ORM</strong></td>
+          <td><span class="badge badge-pick">SQLAlchemy 2.0 + Alembic</span></td>
+          <td>^2.0 + ^1.14</td>
+          <td>SQLite 下最成熟 Python ORM；Alembic 做 schema 迁移；2.0 async session 与 FastAPI 完美配合。</td>
+        </tr>
+        <tr>
+          <td><strong>数据库</strong></td>
+          <td><span class="badge badge-pick">SQLite (aiosqlite)</span></td>
+          <td>≥3.35</td>
+          <td>零安装、单文件、零配置；5,000 行 × 14 列 ≈ 70K cells 轻松处理；WAL 模式支持读写并发。</td>
+        </tr>
+        <tr>
+          <td><strong>数据 ETL</strong></td>
+          <td><span class="badge badge-pick">Pandas</span></td>
+          <td>^2.2</td>
+          <td>14 列 CSV 解析、Currency/ExchangeRate 聚合计算、分组统计的自然选择。</td>
+        </tr>
+        <tr>
+          <td><strong>CSV 导出</strong></td>
+          <td><span class="badge badge-pick">papaparse + file-saver</span></td>
+          <td>—</td>
+          <td>前端直接拿数据构建 Blob 下载，避免后端额外端点。</td>
+        </tr>
+        <tr>
+          <td><strong>包管理</strong></td>
+          <td><span class="badge badge-pick">Poetry + pnpm</span></td>
+          <td>—</td>
+          <td>Poetry 锁依赖确定性强；pnpm 磁盘效率高。</td>
+        </tr>
+        <tr>
+          <td><strong>项目组织</strong></td>
+          <td><span class="badge badge-pick">Monorepo（手动 workspace）</span></td>
+          <td>—</td>
+          <td>Demo 级项目，两个顶层目录 <code class="inline">frontend/</code> <code class="inline">backend/</code> 各自治即可。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>1.2 未采纳方案及原因</h3>
+    <table>
+      <thead><tr><th style="width:22%;">放弃方案</th><th>放弃原因</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Next.js / Remix</strong></td><td>纯 localhost SPA，无 SSR/SEO 需求，Next.js server component 是额外心智负担。</td></tr>
+        <tr><td><strong>Streamlit / Gradio</strong></td><td>数据驱动原型快，但"工程师审核多方案对比"这类交互式 UI 弱，不可扩展为产品。</td></tr>
+        <tr><td><strong>Electron</strong></td><td>浏览器已满足"本地运行"，多一层打包复杂度，且 Ollama 已是独立进程。</td></tr>
+        <tr><td><strong>Django / Flask</strong></td><td>FastAPI 的 async 原生支持对 Ollama 长耗时调用更友好；Django ORM 太重。</td></tr>
+        <tr><td><strong>MongoDB / PostgreSQL</strong></td><td>SQLite 零运维，5,000 行数据规模不需要独立数据库进程。</td></tr>
+        <tr><td><strong>LangChain</strong></td><td>Demo 阶段 prompt 简单明确，langchain 抽象层增加调试难度；直接调 Ollama HTTP API 即可。</td></tr>
+        <tr><td><strong>Docker</strong></td><td>本地 Demo，笔记本直接 pip + npm 安装即可；Docker 增加 OCI 层复杂度。</td></tr>
+        <tr><td><strong>Node.js + Express</strong></td><td>Python 是 AI/ML 生态母语，Pandas 处理 CSV 天然优势；Ollama 官方文档 Python 示例最丰富。</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== 2. ARCHITECTURE DIAGRAM ===== -->
+<section id="s2">
+  <div class="section-title"><span class="num">2</span> 系统架构图</div>
+
+  <div class="card">
+    <h3>2.1 分层架构</h3>
+    <pre>┌──────────────────────────────────────────────────────┐
+│           🖥️ 浏览器 (localhost:5173)                    │
+│  ┌────────────────────────────────────────────────┐  │
+│  │          React 18 + Ant Design 5                │  │
+│  │  ┌─────────┐ ┌──────┐ ┌──────┐ ┌─────┐ ┌────┐ │  │
+│  │  │📊 数据   │ │📝 案例│ │🔍 审核│ │📋 方案│ │⚙️规则│ │  │
+│  │  │  管理页  │ │ 创建页│ │ 编辑页│ │ 对比页│ │管理页│ │  │
+│  │  └─────────┘ └──────┘ └──────┘ └─────┘ └────┘ │  │
+│  │              🐻 Zustand Store                   │  │
+│  └────────────────────────────────────────────────┘  │
+└──────────────────────┬───────────────────────────────┘
+                       │ HTTP REST + SSE
+┌──────────────────────▼───────────────────────────────┐
+│          ⚙️ FastAPI Backend (localhost:8000)          │
+│  ┌────────────────────────────────────────────────┐  │
+│  │              REST API Layer                     │  │
+│  │  /data/*  /cases/*  /plans/*  /rules/*  /ai/*  │  │
+│  ├────────────────────────────────────────────────┤  │
+│  │              Service Layer                      │  │
+│  │  DataService  CaseService  PlanService         │  │
+│  │  RuleService  AIInferenceService               │  │
+│  ├────────────────────────────────────────────────┤  │
+│  │              Data Layer                         │  │
+│  │  SQLAlchemy ORM  →  🗄️ SQLite                 │  │
+│  │  File System     →  📁 uploads/                │  │
+│  └────────────────────────────────────────────────┘  │
+└──────────────────────┬───────────────────────────────┘
+                       │ POST /api/chat (httpx async)
+┌──────────────────────▼───────────────────────────────┐
+│          🤖 Ollama Server (localhost:11434)           │
+│           模型: qwen2.5:14b (推荐)                    │
+└──────────────────────────────────────────────────────┘</pre>
+
+    <h3>2.2 关键交互流</h3>
+    <div class="seq">
+      <span class="actor">1. 上传 CSV</span>：前端 FormData → <code class="inline">POST /api/data/upload</code> → Pandas 解析 → 写入 SQLite + 留存文件<br>
+      <span class="actor">2. AI 推断</span>：<code class="inline">POST /api/cases/{id}/infer</code> → AIInferenceService 构建 Prompt → Ollama → SSE 流式返回 → 写入 <code class="inline">case_cost_items</code><br>
+      <span class="actor">3. 方案生成</span>：<code class="inline">POST /api/cases/{id}/plans</code> → 三次并行的 AI 调用（asyncio.gather）→ 写入 <code class="inline">plan + plan_cost_items</code>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 3. PROJECT STRUCTURE ===== -->
+<section id="s3">
+  <div class="section-title"><span class="num">3</span> 项目目录结构</div>
+
+  <div class="card">
+    <h3>3.1 完整目录树</h3>
+    <pre>windops-bc-analyzer/
+├── frontend/                          # React + Vite
+│   ├── index.html
+│   ├── vite.config.ts
+│   ├── tsconfig.json
+│   ├── package.json
+│   └── src/
+│       ├── main.tsx                   # 入口
+│       ├── App.tsx                    # 路由 + 布局
+│       ├── api/                       # HTTP 请求层
+│       │   ├── client.ts              # axios/fetch 封装
+│       │   ├── dataApi.ts             # 数据上传/查询
+│       │   ├── caseApi.ts             # 案例 CRUD
+│       │   ├── ruleApi.ts             # 规则管理
+│       │   └── aiApi.ts               # AI 推断/方案生成
+│       ├── stores/                    # Zustand
+│       │   ├── useDataStore.ts        # 上传数据摘要
+│       │   ├── useCaseStore.ts        # 当前案例状态
+│       │   └── useRuleStore.ts        # 规则缓存
+│       ├── pages/
+│       │   ├── DataManagement/        # P0-2
+│       │   │   ├── index.tsx
+│       │   │   ├── UploadPanel.tsx
+│       │   │   ├── RecordsTable.tsx
+│       │   │   └── CostGroupMapping.tsx
+│       │   ├── CaseCreation/          # P0-3
+│       │   │   ├── index.tsx
+│       │   │   ├── UserInputForm.tsx   # 🟡 7 字段
+│       │   │   └── AIInferredPanel.tsx # 🟢 8 类成本
+│       │   ├── ReviewEdit/            # P0-4
+│       │   │   ├── index.tsx
+│       │   │   └── CostEditor.tsx
+│       │   ├── PlanComparison/        # P0-5
+│       │   │   ├── index.tsx
+│       │   │   ├── PlanCard.tsx
+│       │   │   └── ComparisonTable.tsx
+│       │   ├── RuleManagement/        # P1-6
+│       │   │   ├── index.tsx
+│       │   │   └── RuleFormModal.tsx
+│       │   └── AIConfig/              # P0-1
+│       │       └── index.tsx
+│       ├── components/                # 通用组件
+│       │   ├── Layout.tsx
+│       │   ├── CostCategoryBadge.tsx
+│       │   ├── AIThinkingOverlay.tsx
+│       │   └── ExportButton.tsx
+│       ├── types/
+│       │   ├── data.ts                # CostRecord, UploadResult
+│       │   ├── case.ts                # Case, CostItem
+│       │   ├── plan.ts                # Plan, PlanCostItem
+│       │   └── rule.ts                # Rule
+│       ├── utils/
+│       │   ├── costMapping.ts
+│       │   ├── export.ts
+│       │   └── format.ts
+│       └── constants/
+│           ├── costCategories.ts
+│           └── siteCountryMap.ts
+│
+├── backend/                           # Python FastAPI
+│   ├── pyproject.toml
+│   ├── alembic.ini
+│   ├── alembic/versions/
+│   ├── app/
+│   │   ├── main.py                    # FastAPI 实例 + CORS + 路由
+│   │   ├── config.py                  # Settings (Ollama URL, DB path)
+│   │   ├── api/                       # 路由层
+│   │   │   ├── data.py                # /api/data/*
+│   │   │   ├── cases.py               # /api/cases/*
+│   │   │   ├── plans.py               # /api/plans/*
+│   │   │   ├── rules.py               # /api/rules/*
+│   │   │   └── ai.py                  # /api/ai/*
+│   │   ├── schemas/                   # Pydantic Models
+│   │   ├── services/                  # 业务逻辑
+│   │   │   ├── data_service.py        # CSV 解析、数据查询
+│   │   │   ├── case_service.py        # 案例 CRUD
+│   │   │   ├── plan_service.py        # 方案生成
+│   │   │   ├── rule_service.py        # 规则 CRUD + 匹配引擎
+│   │   │   └── ai_service.py          # Ollama 通信 + Prompt 构建
+│   │   ├── models/                    # SQLAlchemy ORM (7 表)
+│   │   ├── db/                        # session + init_db
+│   │   └── utils/
+│   │       ├── site_country_map.py    # 站点→国家硬编码
+│   │       ├── cost_mapping.py        # CostGroup→7类业务成本
+│   │       └── exchange_rate.py       # 汇率统一计算
+│   └── uploads/                       # 留存的上传 CSV
+│
+├── data/sample_cost_records.csv
+├── docs/architecture.md
+└── README.md</pre>
+  </div>
+</section>
+
+<!-- ===== 4. MODULE DESIGN ===== -->
+<section id="s4">
+  <div class="section-title"><span class="num">4</span> 核心模块设计</div>
+
+  <div class="card">
+    <h3>4.1 P0-1：AI 模型配置</h3>
+    <table>
+      <thead><tr><th style="width:15%;">维度</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><strong>前端职责</strong></td><td>设置页面：Ollama 地址输入框（默认 <code class="inline">http://localhost:11434</code>）、模型下拉（调 <code class="inline">/api/ai/models</code>）、Temperature/top_p 滑块、连接测试按钮</td></tr>
+        <tr><td><strong>后端职责</strong></td><td><code class="inline">GET /api/ai/models</code> 调 Ollama <code class="inline">/api/tags</code>；配置写入 <code class="inline">ai_config</code> 表；连接测试调 Ollama <code class="inline">/api/generate</code> 空 prompt</td></tr>
+        <tr><td><strong>依赖</strong></td><td>无其他模块依赖，但其他模块依赖此模块的配置</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>4.2 P0-2：历史数据管理 + CostGroup 映射</h3>
+    <table>
+      <thead><tr><th style="width:15%;">维度</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><strong>前端职责</strong></td><td>拖拽上传区域（Ant Design Upload + Dragger）；上传后数据预览表格（ProTable，100 行/页）；CostGroup 映射面板：显示 6 个值 → 7 类业务成本的映射关系（可编辑）</td></tr>
+        <tr><td><strong>后端职责</strong></td><td><code class="inline">POST /api/data/upload</code>：Pandas 读 CSV → 校验 14 列完整性 → 批量 INSERT → COPY 到 <code class="inline">uploads/</code>；<code class="inline">GET /api/data/records</code> 分页查询；<code class="inline">GET /api/data/summary</code> 统计</td></tr>
+        <tr><td><strong>依赖</strong></td><td>无——是数据入口</td></tr>
+      </tbody>
+    </table>
+    <div class="highlight">
+      <strong>CostGroup 默认映射：</strong>Parts → 零部件成本 / Crane → 吊车成本 / Freight → 运输费用 / Labour → 人力成本 / Tools → 工具成本 / Other → 其他
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>4.3 P0-3：案例创建 + AI 填值</h3>
+    <table>
+      <thead><tr><th style="width:15%;">维度</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><strong>前端职责</strong></td><td>表单分两区：🟡 用户输入（7 字段）+ 🟢 AI 推断区（8 类成本），初始置灰，点击「AI 推断」后加载动画 → 显示结果</td></tr>
+        <tr><td><strong>后端职责</strong></td><td><code class="inline">POST /api/cases</code> 保存元数据；<code class="inline">POST /api/cases/{id}/infer</code> 构建推断 prompt（含历史 CostGroup 统计摘要 + 映射表 + 用户字段）→ 调 Ollama → 解析 JSON → 写入 <code class="inline">case_cost_items</code></td></tr>
+        <tr><td><strong>依赖</strong></td><td>依赖 P0-2（需历史数据才有统计基础）、P0-1（AI 配置）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>4.4 P0-4：工程师审核</h3>
+    <table>
+      <thead><tr><th style="width:15%;">维度</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><strong>前端职责</strong></td><td>展示 🟢 区 8 类成本的可编辑表格；AI 推断值 vs 工程师修改值对比；🖊 已修改标记；「重置为 AI 原始值」按钮</td></tr>
+        <tr><td><strong>后端职责</strong></td><td><code class="inline">PUT /api/cases/{id}/costs</code>：批量 upsert，记录 <code class="inline">is_manual_override=True</code></td></tr>
+        <tr><td><strong>依赖</strong></td><td>P0-3</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>4.5 P0-5：多方案对比</h3>
+    <table>
+      <thead><tr><th style="width:15%;">维度</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><strong>前端职责</strong></td><td>三方案卡片（A 丹麦海运 / B 中国空运 / C 当地陆运），各成本项+总成本；汇总对比表，最优方案绿色高亮 + ⭐ 推荐</td></tr>
+        <tr><td><strong>后端职责</strong></td><td><code class="inline">POST /api/cases/{id}/plans</code>：三次并行 AI 调用（asyncio.gather），结果写入 <code class="inline">plan + plan_cost_items</code> 表</td></tr>
+        <tr><td><strong>依赖</strong></td><td>P0-4（以审核后成本为基准，方案在此基础上调整运输/关税/时间相关成本）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>4.6 P1-6：规则管理</h3>
+    <table>
+      <thead><tr><th style="width:15%;">维度</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><strong>前端职责</strong></td><td>规则列表表格 + 添加/编辑弹窗（规则名、适用客户下拉、规则类型、作用值）；开关启停</td></tr>
+        <tr><td><strong>后端职责</strong></td><td>CRUD <code class="inline">/api/rules</code>；规则匹配引擎 — AI 推断时自动注入匹配规则作为 prompt 约束</td></tr>
+        <tr><td><strong>依赖</strong></td><td>P0-3（规则在案例创建时生效）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>4.7 P1-7：结果导出</h3>
+    <table>
+      <thead><tr><th style="width:15%;">维度</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><strong>前端职责</strong></td><td>导出按钮，<code class="inline">papaparse.unparse()</code> + <code class="inline">file-saver</code> 生成 CSV 下载</td></tr>
+        <tr><td><strong>后端职责</strong></td><td>可选：<code class="inline">GET /api/cases/{id}/export</code> 返回文件流</td></tr>
+        <tr><td><strong>依赖</strong></td><td>P0-4 + P0-5</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== 5. DATA MODEL ===== -->
+<section id="s5">
+  <div class="section-title"><span class="num">5</span> 数据模型设计</div>
+
+  <div class="card">
+    <h3>5.1 ER 关系图</h3>
+    <pre>raw_cost_records (1) ──N──&gt; cost_group_mapping (CostGroup → 业务成本映射)
+                                   │
+                                   │ (CostGroup 引用)
+                                   ▼
+cases ──1:N──&gt; case_cost_items (每案例 8 行成本项)
+  │
+  ├──1:N──&gt; plans ──1:N──&gt; plan_cost_items
+  │
+  └──0:N──&gt; rules (规则关联案例的 customer/scope)</pre>
+  </div>
+
+  <div class="card">
+    <h3>5.2 表结构清单</h3>
+
+    <h4>raw_cost_records — 原始成本记录</h4>
+    <pre class="sql">CREATE TABLE raw_cost_records (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    upload_batch_id TEXT    NOT NULL,           -- 上传批次 UUID
+    platform        TEXT,    component         TEXT,
+    site_name       TEXT    NOT NULL,           -- 用于 Country 映射
+    cost_group      TEXT    NOT NULL,           -- Crane/Freight/Labour/Other/Parts/Tools
+    cost_type_description TEXT, cost_per_unit  REAL,
+    currency        TEXT,    exchange_rate_eur REAL,
+    transfer_price_eur_net_incl_claim_sum REAL,
+    quantity_calc_sum       REAL,
+    failure_events          INTEGER,
+    transfer_price_eur_sum  REAL,
+    transfer_price_eur_claim_sum REAL,
+    created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX idx_raw_cost_group ON raw_cost_records(cost_group);
+CREATE INDEX idx_raw_site_name   ON raw_cost_records(site_name);</pre>
+
+    <h4>cost_group_mapping — CostGroup → 业务成本映射</h4>
+    <pre class="sql">CREATE TABLE cost_group_mapping (
+    id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+    cost_group_value        TEXT NOT NULL UNIQUE,   -- 'Parts', 'Crane', etc.
+    business_cost_category  TEXT NOT NULL,          -- '零部件成本', '吊车成本', etc.
+    is_user_defined         INTEGER DEFAULT 0,      -- 0=系统默认, 1=用户修改
+    updated_at              TEXT NOT NULL DEFAULT (datetime('now'))
+);</pre>
+
+    <h4>cases — 案例主表</h4>
+    <pre class="sql">CREATE TABLE cases (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_name           TEXT NOT NULL,
+    -- 🟡 用户输入区 (7 字段)
+    turbine_model       TEXT NOT NULL,    country        TEXT NOT NULL,
+    project_name        TEXT NOT NULL,    contract_type  TEXT NOT NULL,
+    fault_description   TEXT NOT NULL,
+    repair_duration_hours REAL NOT NULL,
+    penalty_amount_eur  REAL NOT NULL DEFAULT 0,
+    -- 状态
+    status              TEXT NOT NULL DEFAULT 'draft',
+    upload_batch_id     TEXT,
+    created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at          TEXT NOT NULL DEFAULT (datetime('now'))
+);</pre>
+
+    <h4>case_cost_items — 案例成本项（每案例 8 行）</h4>
+    <pre class="sql">CREATE TABLE case_cost_items (
+    id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_id                 INTEGER NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+    business_cost_category  TEXT NOT NULL,       -- 7 类 + '总成本合计'
+    ai_inferred_value       REAL,    ai_confidence    REAL,
+    ai_reasoning            TEXT,    reviewed_value   REAL,
+    is_overridden           INTEGER DEFAULT 0,  override_reason  TEXT,
+    source_record_count     INTEGER, source_avg_cost  REAL,
+    created_at              TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at              TEXT NOT NULL DEFAULT (datetime('now'))
+);</pre>
+
+    <h4>plans + plan_cost_items — 方案与明细</h4>
+    <pre class="sql">CREATE TABLE plans (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_id         INTEGER NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+    plan_type       TEXT NOT NULL,       -- 'denmark_sea'|'china_air'|'local_land'
+    plan_label      TEXT NOT NULL,       -- '方案A：丹麦海运'|...
+    total_cost_eur  REAL,   total_duration_days REAL,
+    comparison_rank INTEGER,             -- 排名 1/2/3
+    ai_reasoning    TEXT,
+    created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE plan_cost_items (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    plan_id         INTEGER NOT NULL REFERENCES plans(id) ON DELETE CASCADE,
+    business_cost_category TEXT NOT NULL,
+    estimated_value REAL,   ai_reasoning   TEXT,
+    created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);</pre>
+
+    <h4>rules — 规则表</h4>
+    <pre class="sql">CREATE TABLE rules (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    name            TEXT NOT NULL,   description TEXT,
+    scope           TEXT NOT NULL DEFAULT 'global',  -- 'global'|'customer'
+    customer_code   TEXT,            cost_category TEXT,
+    rule_type       TEXT NOT NULL,   -- 'multiply'|'add'|'cap'|'floor'
+    rule_value      REAL NOT NULL,   condition_json TEXT,
+    priority        INTEGER DEFAULT 0, enabled INTEGER DEFAULT 1,
+    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);</pre>
+
+    <h4>seat 数据：site_country_map + ai_config</h4>
+    <pre class="sql">-- 站点→国家 种子数据 (11 条)
+CREATE TABLE site_country_map (
+    site_code    TEXT PRIMARY KEY,   country_code TEXT NOT NULL,
+    country_name TEXT NOT NULL
+);
+INSERT INTO site_country_map VALUES
+  ('AU','AU','澳大利亚'),('ID','ID','印尼'),('JP','JP','日本'),
+  ('KR','KR','韩国'),  ('NZ','NZ','新西兰'),('PH','PH','菲律宾'),
+  ('TH','TH','泰国'),  ('NC','NC','新喀里多尼亚'),('CN','CN','中国'),
+  ('PK','PK','巴基斯坦'),('VN','VN','越南');
+
+-- AI 配置 (单行)
+CREATE TABLE ai_config (
+    id              INTEGER PRIMARY KEY CHECK (id = 1),
+    ollama_base_url TEXT NOT NULL DEFAULT 'http://localhost:11434',
+    model_name      TEXT NOT NULL DEFAULT 'qwen2.5:14b',
+    temperature     REAL NOT NULL DEFAULT 0.3,
+    top_p           REAL NOT NULL DEFAULT 0.9,
+    max_tokens      INTEGER NOT NULL DEFAULT 4096
+);</pre>
+  </div>
+
+  <div class="highlight-amber">
+    <strong>📊 数据规模估算：</strong>5,000 行 × 14 列 ≈ 70K cells；SQLite 建索引后查询 &lt;50ms；总数据库文件预计 &lt;5MB。
+  </div>
+</section>
+
+<!-- ===== 6. API SPEC ===== -->
+<section id="s6">
+  <div class="section-title"><span class="num">6</span> API 接口规范</div>
+
+  <div class="card">
+    <h3>6.1 数据管理 <code class="inline">/api/v1/data/*</code></h3>
+    <table>
+      <thead><tr><th style="width:10%;">方法</th><th style="width:30%;">端点</th><th style="width:25%;">说明</th><th style="width:35%;">关键参数/响应</th></tr></thead>
+      <tbody>
+        <tr><td><span class="api-method api-post">POST</span></td><td><code class="inline">/data/upload</code></td><td>上传 CSV</td><td>multipart/form-data → <code class="inline">{ batch_id, row_count }</code></td></tr>
+        <tr><td><span class="api-method api-get">GET</span></td><td><code class="inline">/data/records</code></td><td>分页查询</td><td><code class="inline">?page=&amp;page_size=100&amp;cost_group=Freight</code></td></tr>
+        <tr><td><span class="api-method api-get">GET</span></td><td><code class="inline">/data/summary</code></td><td>数据摘要</td><td>→ CostGroup/Currency/SiteName 分布统计</td></tr>
+        <tr><td><span class="api-method api-get">GET</span></td><td><code class="inline">/data/mappings</code></td><td>获取映射</td><td>→ <code class="inline">[{ cost_group, business_category }]</code></td></tr>
+        <tr><td><span class="api-method api-put">PUT</span></td><td><code class="inline">/data/mappings</code></td><td>更新映射</td><td>工程师确认/修正 CostGroup 映射</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>6.2 案例管理 + AI 推断 <code class="inline">/api/v1/cases/*</code></h3>
+    <table>
+      <thead><tr><th style="width:10%;">方法</th><th style="width:30%;">端点</th><th style="width:25%;">说明</th><th style="width:35%;">关键参数/响应</th></tr></thead>
+      <tbody>
+        <tr><td><span class="api-method api-post">POST</span></td><td><code class="inline">/cases</code></td><td>创建案例</td><td>7 用户字段 → <code class="inline">{ case_id }</code></td></tr>
+        <tr><td><span class="api-method api-get">GET</span></td><td><code class="inline">/cases</code></td><td>案例列表</td><td><code class="inline">?status=reviewed</code></td></tr>
+        <tr><td><span class="api-method api-get">GET</span></td><td><code class="inline">/cases/{id}</code></td><td>案例详情</td><td>→ 案例 + 全部 cost_items</td></tr>
+        <tr><td><span class="api-method api-post">POST</span></td><td><code class="inline">/cases/{id}/infer</code></td><td><strong>AI 推断成本</strong></td><td>SSE 流式 → <code class="inline">{ type: "progress"|"result" }</code></td></tr>
+        <tr><td><span class="api-method api-put">PUT</span></td><td><code class="inline">/cases/{id}/costs</code></td><td>审核更新成本</td><td><code class="inline">[{ category, reviewed_value }]</code></td></tr>
+        <tr><td><span class="api-method api-post">POST</span></td><td><code class="inline">/cases/{id}/plans</code></td><td><strong>生成三方案</strong></td><td>SSE 流式 → 三次并行 AI 调用</td></tr>
+        <tr><td><span class="api-method api-get">GET</span></td><td><code class="inline">/cases/{id}/plans</code></td><td>获取方案</td><td>→ <code class="inline">[{ plan_type, total_cost_eur, items }]</code></td></tr>
+        <tr><td><span class="api-method api-delete">DELETE</span></td><td><code class="inline">/cases/{id}</code></td><td>删除案例</td><td>级联删除 cost_items + plans</td></tr>
+        <tr><td><span class="api-method api-get">GET</span></td><td><code class="inline">/cases/{id}/export</code></td><td>导出 CSV</td><td>Content-Type: text/csv 文件流</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>6.3 规则 + AI 配置</h3>
+    <table>
+      <thead><tr><th style="width:10%;">方法</th><th style="width:30%;">端点</th><th style="width:25%;">说明</th><th style="width:35%;">关键参数/响应</th></tr></thead>
+      <tbody>
+        <tr><td><span class="api-method api-get">GET</span></td><td><code class="inline">/rules</code></td><td>规则列表</td><td><code class="inline">?scope=global&amp;enabled=true</code></td></tr>
+        <tr><td><span class="api-method api-post">POST</span></td><td><code class="inline">/rules</code></td><td>创建规则</td><td><code class="inline">{ name, scope, rule_type, rule_value }</code></td></tr>
+        <tr><td><span class="api-method api-put">PUT</span></td><td><code class="inline">/rules/{id}</code></td><td>更新规则</td><td>—</td></tr>
+        <tr><td><span class="api-method api-delete">DELETE</span></td><td><code class="inline">/rules/{id}</code></td><td>删除规则</td><td>—</td></tr>
+        <tr><td><span class="api-method api-get">GET</span></td><td><code class="inline">/ai/config</code></td><td>获取 AI 配置</td><td>—</td></tr>
+        <tr><td><span class="api-method api-put">PUT</span></td><td><code class="inline">/ai/config</code></td><td>更新 AI 配置</td><td><code class="inline">{ model_name, temperature }</code></td></tr>
+        <tr><td><span class="api-method api-get">GET</span></td><td><code class="inline">/ai/models</code></td><td>列出已安装模型</td><td>→ 调 Ollama <code class="inline">/api/tags</code></td></tr>
+        <tr><td><span class="api-method api-post">POST</span></td><td><code class="inline">/ai/test</code></td><td>连接测试</td><td>→ <code class="inline">{ success, response_time_ms }</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>6.4 AI 调用流程序列</h3>
+    <pre>┌─────────┐     ┌──────────┐     ┌───────────┐
+│ 前端     │     │ FastAPI   │     │ Ollama     │
+│ React   │     │ (httpx)  │     │ :11434     │
+└────┬────┘     └────┬─────┘     └─────┬──────┘
+     │ POST /infer   │                 │
+     │──────────────&gt;│                 │
+     │               │ 构建 Prompt     │
+     │               │─ 含历史统计摘要 │
+     │               │─ 含规则匹配     │
+     │               │─ 含 CostGroup 映射│
+     │               │                 │
+     │               │ POST /api/chat  │
+     │               │ (stream: true)  │
+     │               │────────────────&gt;│
+     │               │                 │
+     │               │  token stream   │
+     │               │&lt;── ─ ─ ─ ─ ─ ─ │
+     │               │                 │
+     │  SSE: progress│                 │
+     │  + final JSON │                 │
+     │&lt;── ─ ─ ─ ─ ─ ─│                 │
+     │               │                 │
+     │ 解析 JSON     │                 │
+     │ 写入 DB       │                 │</pre>
+  </div>
+</section>
+
+<!-- ===== 7. AI STRATEGY ===== -->
+<section id="s7">
+  <div class="section-title"><span class="num">7</span> AI 集成策略</div>
+
+  <div class="card">
+    <h3>7.1 异步通信核心代码</h3>
+    <pre>class AIInferenceService:
+    def __init__(self, config: AIConfig):
+        self.client = httpx.AsyncClient(
+            base_url=config.ollama_base_url,
+            timeout=httpx.Timeout(120.0)
+        )
+        self.model = config.model_name
+
+    async def chat_stream(self, messages: list[dict]) -&gt; AsyncIterator[str]:
+        """流式调用 Ollama，逐 token yield"""
+        async with self.client.stream(
+            "POST", "/api/chat",
+            json={
+                "model": self.model,
+                "messages": messages,
+                "stream": True,
+                "options": {
+                    "temperature": 0.3,
+                    "top_p": 0.9,
+                    "num_predict": 4096
+                }
+            }
+        ) as response:
+            async for line in response.aiter_lines():
+                if line.strip():
+                    data = json.loads(line)
+                    if data.get("done"): break
+                    yield data["message"]["content"]</pre>
+  </div>
+
+  <div class="card">
+    <h3>7.2 三套 Prompt 工程设计</h3>
+
+    <h4>Prompt ① — CostGroup 映射验证</h4>
+    <table>
+      <thead><tr><th>角色</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td><strong>System</strong></td><td>你是风电运维成本分析专家。CostGroup 有 6 个值：Crane, Freight, Labour, Other, Parts, Tools。请理解它们对应的业务成本类型。</td></tr>
+        <tr><td><strong>User</strong></td><td>给出 CostGroup 映射（含 CostTypeDescription 统计分布），验证默认映射是否合理。</td></tr>
+        <tr><td><strong>输出</strong></td><td>JSON 格式的映射确认或修正建议。</td></tr>
+      </tbody>
+    </table>
+
+    <h4>Prompt ② — 案例成本推断（核心）</h4>
+    <table>
+      <thead><tr><th>角色</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td><strong>System</strong></td><td>你是风电运维成本估算专家。根据历史成本数据和故障描述，推断 7 类成本。优先同 Component+同 Country 匹配，降级到全局平均。输出严格 JSON。</td></tr>
+        <tr><td><strong>统计注入</strong></td><td>历史数据摘要：各 CostGroup 均值/中位数/样本数；各 Component 成本分布；各 Country 成本分布。</td></tr>
+        <tr><td><strong>User</strong></td><td>案例 7 字段 + 匹配的规则列表。</td></tr>
+        <tr><td><strong>输出</strong></td><td><code class="inline">{"items": [{business_cost_category, estimated_value, confidence, reasoning, source_record_count}], "total_estimated_cost": ...}</code></td></tr>
+      </tbody>
+    </table>
+
+    <h4>Prompt ③ — 三方案生成</h4>
+    <table>
+      <thead><tr><th>角色</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td><strong>System</strong></td><td>你是风电运维物流方案专家。基于审核后的案例，生成 A（丹麦海运）、B（中国空运）、C（当地陆运）三方案。每方案调整运输/关税/时间相关成本。输出严格 JSON 含排名和理由。</td></tr>
+        <tr><td><strong>User</strong></td><td>审核确认的完整案例数据 + 规则。</td></tr>
+        <tr><td><strong>输出</strong></td><td><code class="inline">{"plans": [{plan_type, items[], total_cost_eur, total_duration_days, comparison_rank, reasoning}]}</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>7.3 错误处理策略</h3>
+    <table>
+      <thead><tr><th>场景</th><th>处理方式</th></tr></thead>
+      <tbody>
+        <tr><td>Ollama 进程未启动</td><td>前端提示"AI 服务不可用，请确认 Ollama 已启动" + 启动指令</td></tr>
+        <tr><td>模型未安装</td><td>调用前检查 <code class="inline">/api/tags</code>，若模型不在则提示 <code class="inline">ollama pull qwen2.5:14b</code></td></tr>
+        <tr><td>推理超时（120s）</td><td>前端显示超时提示，允许重试；后端记录日志</td></tr>
+        <tr><td>JSON 解析失败</td><td>自动重试最多 2 次，重试 prompt 中加入"请确保输出严格 JSON"</td></tr>
+        <tr><td>输出字段缺失</td><td>用历史中位数填充，标记 <code class="inline">confidence=0.1</code></td></tr>
+        <tr><td>笔记本 RAM 不足</td><td>监控推理时内存；若 OOM，建议切换到 <code class="inline">qwen2.5:7b</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== 8. KEY DECISIONS ===== -->
+<section id="s8">
+  <div class="section-title"><span class="num">8</span> 关键技术决策与权衡</div>
+
+  <div class="card">
+    <h3>8.1 决策记录（Top 10）</h3>
+    <table>
+      <thead><tr><th style="width:4%;">#</th><th style="width:22%;">决策</th><th style="width:28%;"><span class="badge badge-pick">✅ 选择</span></th><th style="width:28%;"><span class="badge badge-drop">❌ 放弃</span></th><th>权衡分析</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>D1</td><td>后端语言</td><td>Python + FastAPI</td><td>Node.js + Express</td><td>Python 是 AI/ML 母语；Pandas 处理 CSV 天然优势；AI prompt 构建涉及大量统计计算</td>
+        </tr>
+        <tr>
+          <td>D2</td><td>AI 通信</td><td>SSE 流式透传</td><td>轮询 / WebSocket</td><td>Ollama 原生支持 stream，SSE 是 HTTP 原生方案，比 WebSocket 更简单</td>
+        </tr>
+        <tr>
+          <td>D3</td><td>前端状态</td><td>Zustand</td><td>Redux Toolkit</td><td>API 表面积最小，3 个 store 对 Demo 级项目足够</td>
+        </tr>
+        <tr>
+          <td>D4</td><td>表格性能</td><td>ProTable 分页</td><td>虚拟滚动</td><td>100 行/页分页即可满足需求，虚拟滚动仅在全量展示时才必要</td>
+        </tr>
+        <tr>
+          <td>D5</td><td>成本推断</td><td><strong>单次 AI 调 7 类</strong></td><td>7 次独立调用</td><td>单次调用保留成本间关联性，总延迟 1 次推理（vs 7 次串联）</td>
+        </tr>
+        <tr>
+          <td>D6</td><td>Prompt 数据注入</td><td><strong>统计摘要</strong></td><td>全量 5,000 行</td><td>统计摘要在 2-3K tokens 内传递数据分布，避免超 token 限制</td>
+        </tr>
+        <tr>
+          <td>D7</td><td>方案生成</td><td><strong>三次并行调用</strong></td><td>一次调用三方案</td><td>并行 = 总延迟≈最慢的一次；独立上下文保证每个方案质量</td>
+        </tr>
+        <tr>
+          <td>D8</td><td>CSV 导出</td><td>前端浏览器生成</td><td>后端文件流</td><td>papaparse 直接从 store 取数据生成 Blob，无需额外网络请求</td>
+        </tr>
+        <tr>
+          <td>D9</td><td>Monorepo</td><td>手动 workspace</td><td>Nx / Turborepo</td><td>2 个包不需要 task orchestration；<code class="inline">concurrently</code> 启动前后端即可</td>
+        </tr>
+        <tr>
+          <td>D10</td><td>无日期字段</td><td>等权处理</td><td>按批次降权</td><td>用户明确接受"无时间加权"；等权简化统计逻辑</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>8.2 风险矩阵</h3>
+    <table>
+      <thead><tr><th style="width:30%;">风险</th><th style="width:12%;">概率</th><th style="width:12%;">影响</th><th>缓解措施</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-risk-mid">中</span> qwen2.5:14b JSON 输出不稳定</td>
+          <td>中</td>
+          <td>高</td>
+          <td>重试×2 + temperature=0.3 + prompt 强调 JSON + 正则提取 fallback + 历史均值降级</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-risk-low">低</span> 笔记本 16GB RAM 不足</td>
+          <td>低</td>
+          <td>中</td>
+          <td>一键切换模型（14b → 7b → 3b）；文档写清最低配置</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-risk-low">低</span> Ollama 版本兼容性</td>
+          <td>低</td>
+          <td>低</td>
+          <td>固定 <code class="inline">/api/chat</code> 格式（Ollama 已稳定）；预留 api_version 字段</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-risk-low">低</span> 5,000 行表格性能</td>
+          <td>低</td>
+          <td>低</td>
+          <td>ProTable 分页 100 行/页 + SQLite 索引查询 &lt;50ms</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-risk-low">低</span> CostGroup 映射歧义</td>
+          <td>低</td>
+          <td>中</td>
+          <td>默认映射已确认；用户可在前端修改映射；AI 推断读取当前映射表</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-risk-low">极低</span> 多用户并发</td>
+          <td>极低</td>
+          <td>低</td>
+          <td>Demo 阶段单用户；SQLite WAL 模式支持读并发；未来可迁移 PostgreSQL</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>8.3 扩展预留</h3>
+    <ul>
+      <li><code class="inline">ai_service.py</code> 的 <code class="inline">chat_stream()</code> 接受标准 <code class="inline">messages: list[dict]</code>，未来切换 OpenAI API 只需改 base_url</li>
+      <li>规则引擎 <code class="inline">condition_json</code> 为 JSON 字符串，可扩展 AND/OR 逻辑</li>
+      <li><code class="inline">business_cost_category</code> 使用字符串（非枚举），新增成本类别无需改表</li>
+      <li>FastAPI 依赖注入模式，未来可插入认证中间件</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>8.4 启动命令</h3>
+    <pre># 1. 启动 Ollama (如有未运行)
+ollama serve
+
+# 2. 拉取模型 (首次)
+ollama pull qwen2.5:14b
+
+# 3. 启动后端
+cd backend
+poetry install
+poetry run alembic upgrade head
+poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+# 4. 启动前端
+cd frontend
+pnpm install
+pnpm dev          # → http://localhost:5173</pre>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div style="text-align:center;padding:32px 0;color:var(--muted);font-size:13px;border-top:1px solid var(--border);margin-top:40px;">
+  WindOps BC Analyzer · 系统架构方案 v1.0 · 2026-05-06 · 系统架构师 · 内部技术文档
+</div>
+
+</div>
+
+</body></html>

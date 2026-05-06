@@ -41,8 +41,12 @@ export default function PlanComparison() {
   const handleRegenerate = async () => {
     if (!id) return
     setPlanLoading(true)
-    await generatePlans(parseInt(id))
-    await fetchPlans(parseInt(id))
+    const result = await generatePlans(parseInt(id))
+    if (result && result.type === 'result') {
+      await fetchPlans(parseInt(id))
+    } else {
+      message.error('方案生成失败，请检查 Ollama 服务是否正常运行')
+    }
     setPlanLoading(false)
   }
 
@@ -127,9 +131,16 @@ export default function PlanComparison() {
       {rankedPlans.length === 0 && !planLoading && (
         <Alert
           message="尚未生成方案对比"
-          description="请先在案例审核页面保存审核修改后，点击「生成三方案对比」"
-          type="info"
+          description={error
+            ? `方案生成失败: ${error}。请确认 Ollama 服务正常运行后重试。`
+            : "请点击下方「重新分析」按钮生成三方案对比"}
+          type={error ? "error" : "warning"}
           showIcon
+          action={
+            <Button size="small" type="primary" icon={<ReloadOutlined />} onClick={handleRegenerate} loading={planLoading}>
+              重新分析
+            </Button>
+          }
         />
       )}
 

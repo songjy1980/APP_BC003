@@ -46,9 +46,13 @@ export default function CaseReview() {
   const handleGeneratePlans = async () => {
     if (!id) return
     setPlanLoading(true)
-    await generatePlans(parseInt(id))
+    const result = await generatePlans(parseInt(id))
     setPlanLoading(false)
-    navigate(`/cases/${id}/plans`)
+    if (result && result.type === 'result') {
+      navigate(`/cases/${id}/plans`)
+    } else {
+      message.error('方案生成失败，请检查 Ollama 服务是否正常运行，然后重试')
+    }
   }
 
   const handleDelete = () => {
@@ -181,7 +185,7 @@ export default function CaseReview() {
             icon={<SaveOutlined />}
             onClick={handleSaveReviews}
             loading={saving}
-            disabled={Object.keys(editingItems).length === 0}
+            disabled={currentCase.cost_items?.length === 0}
           >
             保存审核修改
           </Button>
@@ -190,7 +194,7 @@ export default function CaseReview() {
             icon={<BarChartOutlined />}
             onClick={handleGeneratePlans}
             loading={planLoading}
-            disabled={!reviewed}
+            disabled={currentCase.status === 'draft'}
             style={{ background: '#059669', borderColor: '#059669' }}
           >
             生成三方案对比

@@ -15,6 +15,19 @@ class AIInferenceService:
         self.max_tokens = settings.max_tokens
         self._client: Optional[httpx.AsyncClient] = None
 
+    async def load_config_from_db(self, db_session):
+        from sqlalchemy import select
+        from app.models.models import AIConfig
+        result = await db_session.execute(select(AIConfig))
+        config = result.scalar()
+        if config:
+            self.base_url = config.ollama_base_url or settings.ollama_base_url
+            self.model = config.model_name or settings.model_name
+            self.temperature = config.temperature if config.temperature is not None else settings.temperature
+            self.max_tokens = config.max_tokens if config.max_tokens is not None else settings.max_tokens
+            if self._client:
+                self._client.base_url = self.base_url
+
     async def _get_client(self) -> httpx.AsyncClient:
         if self._client is None:
             self._client = httpx.AsyncClient(

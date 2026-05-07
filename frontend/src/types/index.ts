@@ -89,6 +89,7 @@ export interface RuleItem {
   scope: string
   customer_code: string | null
   cost_category: string | null
+  applicable_flow: string | null
   rule_type: string
   rule_value: number
   condition_json: string | null

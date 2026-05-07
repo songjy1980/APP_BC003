@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import {
-  Card, Table, Button, Modal, Form, Input, Select, InputNumber, Typography, Space, Tag, Switch, message, Popconfirm,
+  Card, Table, Button, Modal, Form, Input, Select, InputNumber, Typography, Space, Tag, Switch, message, Popconfirm, Tabs,
 } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import { PlusOutlined, EditOutlined, DeleteOutlined, FilterOutlined } from '@ant-design/icons'
 import { useRuleStore } from '../stores/rulesStore'
 import type { RuleItem } from '../types'
 
@@ -14,6 +14,14 @@ const RULE_TYPES = [
   { label: '加值 (add)', value: 'add' },
   { label: '上限 (cap)', value: 'cap' },
   { label: '下限 (floor)', value: 'floor' },
+  { label: '统计策略 (statistics)', value: 'statistics' },
+  { label: '检测规则 (detection)', value: 'detection' },
+  { label: '标记规则 (marker)', value: 'marker' },
+]
+
+const FLOW_TYPES = [
+  { label: '创建案例', value: 'create_case', color: 'green' },
+  { label: '生成方案', value: 'generate_plan', color: 'blue' },
 ]
 
 export default function RulesManagement() {
@@ -21,6 +29,7 @@ export default function RulesManagement() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingRule, setEditingRule] = useState<RuleItem | null>(null)
   const [form] = Form.useForm()
+  const [flowFilter, setFlowFilter] = useState('')
 
   useEffect(() => {
     fetchRules()
@@ -29,7 +38,7 @@ export default function RulesManagement() {
   const handleAdd = () => {
     setEditingRule(null)
     form.resetFields()
-    form.setFieldsValue({ scope: 'global', rule_type: 'multiply', priority: 0, enabled: 1, rule_value: 1 })
+    form.setFieldsValue({ scope: 'global', rule_type: 'multiply', priority: 0, enabled: 1, rule_value: 1, applicable_flow: '' })
     setModalOpen(true)
   }
 
@@ -55,37 +64,47 @@ export default function RulesManagement() {
     fetchRules()
   }
 
+  const filteredRules = flowFilter ? rules.filter((r) => r.applicable_flow === flowFilter) : rules
+
   const columns = [
-    { title: '规则名称', dataIndex: 'name', width: 200 },
+    { title: '规则名称', dataIndex: 'name', width: 180 },
     {
-      title: '范围', dataIndex: 'scope', width: 90,
-      render: (v: string) => v === 'global' ? <Tag color="blue">全局</Tag> : <Tag color="orange">客户级</Tag>,
-    },
-    {
-      title: '客户代码', dataIndex: 'customer_code', width: 130,
-      render: (v: string | null) => v || '-',
-    },
-    { title: '描述', dataIndex: 'description', ellipsis: true },
-    {
-      title: '类型', dataIndex: 'rule_type', width: 90,
-      render: (v: string) => {
-        const labels: Record<string, string> = { multiply: '倍数', add: '加值', cap: '上限', floor: '下限' }
-        return labels[v] || v
+      title: '适用流程', dataIndex: 'applicable_flow', width: 100,
+      render: (v: string | null) => {
+        if (v === 'create_case') return <Tag color="green">创建案例</Tag>
+        if (v === 'generate_plan') return <Tag color="blue">生成方案</Tag>
+        return <Tag>—</Tag>
       },
     },
     {
-      title: '值', dataIndex: 'rule_value', width: 80, align: 'right' as const,
-      render: (v: number) => v?.toFixed(2),
+      title: '范围', dataIndex: 'scope', width: 80,
+      render: (v: string) => v === 'global' ? <Tag color="blue">全局</Tag> : <Tag color="orange">客户级</Tag>,
     },
-    { title: '优先级', dataIndex: 'priority', width: 70, align: 'center' as const },
     {
-      title: '启用', dataIndex: 'enabled', width: 70, align: 'center' as const,
+      title: '客户代码', dataIndex: 'customer_code', width: 110,
+      render: (v: string | null) => v || '-',
+    },
+    { title: '描述', dataIndex: 'description', ellipsis: true, width: 280 },
+    {
+      title: '类型', dataIndex: 'rule_type', width: 90,
+      render: (v: string) => {
+        const labels: Record<string, string> = {
+          multiply: '倍数', add: '加值', cap: '上限', floor: '下限',
+          statistics: '统计策略', detection: '检测规则', marker: '标记规则',
+        }
+        return labels[v] || v
+      },
+    },
+    { title: '值', dataIndex: 'rule_value', width: 70, align: 'right' as const, render: (v: number) => v?.toFixed(2) },
+    { title: '优先级', dataIndex: 'priority', width: 65, align: 'center' as const },
+    {
+      title: '启用', dataIndex: 'enabled', width: 60, align: 'center' as const,
       render: (v: number, record: RuleItem) => (
         <Switch size="small" checked={v === 1} onChange={() => handleToggle(record)} />
       ),
     },
     {
-      title: '操作', width: 120,
+      title: '操作', width: 100,
       render: (_: unknown, record: RuleItem) => (
         <Space>
           <Button size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
@@ -102,19 +121,41 @@ export default function RulesManagement() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <Title level={4} style={{ margin: 0 }}>知识与规则管理</Title>
-          <Text type="secondary">管理全局和客户级业务规则，AI 分析时将自动引用</Text>
+          <Text type="secondary">管理全局和客户级业务规则，AI 分析时将自动按适用流程引用</Text>
         </div>
         <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>新建规则</Button>
       </div>
 
-      <Card style={{ marginTop: 16 }}>
+      <Space style={{ marginTop: 12, marginBottom: 8 }}>
+        <FilterOutlined />
+        <Tag color={!flowFilter ? 'default' : undefined} style={{ cursor: 'pointer' }}
+             onClick={() => setFlowFilter('')}>
+          全部 ({rules.length})
+        </Tag>
+        {FLOW_TYPES.map((ft) => {
+          const count = rules.filter((r) => r.applicable_flow === ft.value).length
+          return (
+            <Tag
+              key={ft.value}
+              color={flowFilter === ft.value ? ft.color : undefined}
+              style={{ cursor: 'pointer' }}
+              onClick={() => setFlowFilter(flowFilter === ft.value ? '' : ft.value)}
+            >
+              {ft.label} ({count})
+            </Tag>
+          )
+        })}
+      </Space>
+
+      <Card style={{ marginTop: 8 }}>
         <Table
-          dataSource={rules}
+          dataSource={filteredRules}
           rowKey="id"
           columns={columns}
           loading={loading}
           pagination={false}
           size="small"
+          scroll={{ x: 1200 }}
         />
       </Card>
 
@@ -133,6 +174,12 @@ export default function RulesManagement() {
           </Form.Item>
           <Form.Item label="描述" name="description">
             <TextArea rows={2} placeholder="规则详细说明..." />
+          </Form.Item>
+          <Form.Item label="适用流程" name="applicable_flow">
+            <Select allowClear placeholder="选择适用流程" options={[
+              { label: '创建案例', value: 'create_case' },
+              { label: '生成方案', value: 'generate_plan' },
+            ]} />
           </Form.Item>
           <Form.Item label="适用范围" name="scope" rules={[{ required: true }]}>
             <Select options={[

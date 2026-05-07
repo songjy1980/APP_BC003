@@ -14,6 +14,7 @@ router = APIRouter(prefix="/api/v1/rules", tags=["rules"])
 async def get_rules(
     scope: str = None,
     enabled: bool = None,
+    applicable_flow: str = None,
     db: AsyncSession = Depends(get_db),
 ):
     query = select(Rule)
@@ -21,6 +22,8 @@ async def get_rules(
         query = query.where(Rule.scope == scope)
     if enabled is not None:
         query = query.where(Rule.enabled == (1 if enabled else 0))
+    if applicable_flow:
+        query = query.where(Rule.applicable_flow == applicable_flow)
     query = query.order_by(Rule.priority.desc(), Rule.created_at.desc())
     result = await db.execute(query)
     return result.scalars().all()
@@ -34,6 +37,7 @@ async def create_rule(rule_data: RuleCreateSchema, db: AsyncSession = Depends(ge
         scope=rule_data.scope,
         customer_code=rule_data.customer_code,
         cost_category=rule_data.cost_category,
+        applicable_flow=rule_data.applicable_flow or "",
         rule_type=rule_data.rule_type,
         rule_value=rule_data.rule_value,
         condition_json=rule_data.condition_json,

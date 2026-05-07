@@ -120,6 +120,7 @@ class Rule(Base):
     scope = Column(String, nullable=False, default="global")
     customer_code = Column(String, nullable=True)
     cost_category = Column(String, nullable=True)
+    applicable_flow = Column(String, nullable=True)
     rule_type = Column(String, nullable=False)
     rule_value = Column(Float, nullable=False)
     condition_json = Column(Text, nullable=True)

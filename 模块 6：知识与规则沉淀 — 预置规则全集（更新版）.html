@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<!-- saved from url=(0581)https://lobechat-cloud.d35842305b91be4b48e06ff9a9ad83f5.r2.cloudflarestorage.com/code-interpreter-exports/2026-05-07/tpc_8fRnnG7g5Sbe/%E6%A8%A1%E5%9D%976_%E7%9F%A5%E8%AF%86%E4%B8%8E%E8%A7%84%E5%88%99%E6%B2%89%E6%B7%80_%E6%9B%B4%E6%96%B0%E7%89%88.html?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=f6ccfc7b3525564c0e473abfda403fe7%2F20260507%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260507T031836Z&X-Amz-Expires=300&X-Amz-Signature=be423ae9b90347beaad2fcc7be2cb177221bedaa271975ef25d1f240048ba9a7&X-Amz-SignedHeaders=host&x-id=GetObject -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <title>模块 6：知识与规则沉淀 — 预置规则全集（更新版）</title>
+  <style>
+    body { font-family: -apple-system, "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; max-width: 1200px; margin: 40px auto; padding: 0 24px; background: #fafafa; color: #1a1a1a; line-height: 1.6; }
+    h1 { font-size: 24px; border-bottom: 3px solid #2563eb; padding-bottom: 10px; margin-bottom: 24px; }
+    h2 { font-size: 20px; color: #2563eb; margin-top: 36px; margin-bottom: 12px; }
+    h3 { font-size: 16px; color: #374151; margin-top: 28px; margin-bottom: 8px; border-left: 4px solid #2563eb; padding-left: 10px; }
+    .stats-summary { background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 8px; padding: 16px 20px; margin-bottom: 24px; }
+    .stats-summary table { border: none; background: transparent; }
+    .stats-summary td { padding: 4px 16px 4px 0; border: none; font-size: 14px; }
+    .stats-summary .num { font-weight: 700; color: #2563eb; font-size: 18px; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 24px 0; font-size: 13px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    th { background: #2563eb; color: white; padding: 10px 8px; text-align: left; font-weight: 600; white-space: nowrap; }
+    td { padding: 8px; border: 1px solid #e5e7eb; vertical-align: top; }
+    tr:nth-child(even) { background: #f9fafb; }
+    tr:hover { background: #eef2ff; }
+    .tag-scope { display: inline-block; background: #dbeafe; color: #1e40af; font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+    .tag-client { display: inline-block; background: #fef3c7; color: #92400e; font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+    .tag-type { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+    .tag-type-multiplier { background: #dcfce7; color: #166534; }
+    .tag-type-additive { background: #fce7f3; color: #9d174d; }
+    .tag-type-upper { background: #fee2e2; color: #991b1b; }
+    .tag-type-lower { background: #fef9c3; color: #854d0e; }
+    .tag-type-stat { background: #e0e7ff; color: #3730a3; }
+    .tag-type-detect { background: #f3e8ff; color: #6b21a8; }
+    .tag-type-label { background: #ccfbf1; color: #115e59; }
+    .tag-flow { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+    .tag-flow-create { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
+    .tag-flow-solution { background: #eff6ff; color: #1e40af; border: 1px solid #93c5fd; }
+    .group-header td { background: #f3f4f6; font-weight: 700; color: #374151; border-bottom: 2px solid #d1d5db; }
+    .note { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px 16px; margin: 16px 0; border-radius: 4px; font-size: 14px; color: #78350f; }
+    .badge-new { display: inline-block; background: #2563eb; color: white; font-size: 10px; padding: 1px 6px; border-radius: 4px; margin-left: 6px; font-weight: 600; }
+    .value-cell { font-family: "JetBrains Mono", monospace; font-size: 13px; }
+  </style>
+</head>
+<body>
+
+<h1>模块 6：知识与规则沉淀 — 预置规则全集</h1>
+
+<div class="note">
+  <strong>📌 版本说明</strong>：本版本在上一版基础上进行两项变更 —
+  <strong>(1)</strong> 移除规则名称中的字母+数字标识符（如 <code>R-001</code>、<code>R-D02</code> 等）；<strong>(2)</strong> 新增「适用流程」字段，<span style="background:#f0fdf4;padding:1px 6px;border:1px solid #86efac;border-radius:4px;">创建案例</span> 6 条（历史数据处理），其余 40 条均为 <span style="background:#eff6ff;padding:1px 6px;border:1px solid #93c5fd;border-radius:4px;">生成方案</span>。
+</div>
+
+<div class="stats-summary">
+  <table style="width:auto;background:transparent;box-shadow:none;">
+    <tbody><tr>
+      <td>规则总数</td>
+      <td class="num">46</td>
+      <td style="padding-left:32px;">其中 <span class="tag-flow tag-flow-create">创建案例</span></td>
+      <td class="num">6 条</td>
+    </tr>
+    <tr>
+      <td>覆盖组数</td>
+      <td class="num">4</td>
+      <td style="padding-left:32px;">其中 <span class="tag-flow tag-flow-solution">生成方案</span></td>
+      <td class="num">40 条</td>
+    </tr>
+  </tbody></table>
+  <table style="width:auto;background:transparent;box-shadow:none;margin-top:4px;">
+    <tbody><tr>
+      <td><span class="tag-type tag-type-multiplier">倍数</span> 27</td>
+      <td style="padding-left:16px;"><span class="tag-type tag-type-additive">加值</span> 11</td>
+      <td style="padding-left:16px;"><span class="tag-type tag-type-upper">上限</span> 1</td>
+      <td style="padding-left:16px;"><span class="tag-type tag-type-lower">下限</span> 2</td>
+      <td style="padding-left:16px;"><span class="tag-type tag-type-stat">统计策略</span> 1</td>
+      <td style="padding-left:16px;"><span class="tag-type tag-type-detect">检测规则</span> 1</td>
+      <td style="padding-left:16px;"><span class="tag-type tag-type-label">标记规则</span> 1</td>
+    </tr>
+  </tbody></table>
+</div>
+
+<!-- ============================================================ -->
+<h2>A. 零部件采购与运输成本</h2>
+
+<h3>A1. 零部件成本（倍数型）</h3>
+<table>
+  <tbody><tr>
+    <th style="width:22%">规则名称</th>
+    <th style="width:5%">范围</th>
+    <th style="width:5%">客户代码</th>
+    <th style="width:34%">描述</th>
+    <th style="width:8%">类型</th>
+    <th style="width:10%">值</th>
+    <th style="width:6%">优先级</th>
+    <th style="width:10%">适用流程</th>
+  </tr>
+  <tr>
+    <td>丹麦总部采购基准</td>
+    <td><span class="tag-scope">全局</span></td>
+    <td><span class="tag-client">—</span></td>
+    <td>丹麦/欧洲为全球风电零部件高端制造中心（Vestas、Siemens Gamesa 总部），采购价为系统基准值。适用于全部 5 类采购部件（Blade / Blade Bearing / Generator / Main Bearing / Yaw 及其子零部件）。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td>
+    <td class="value-cell">1.00</td>
+    <td>10</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>中国采购成本优势</td>
+    <td><span class="tag-scope">全局</span></td>
+    <td><span class="tag-client">—</span></td>
+    <td>中国风机制造成本比西方同类低约 30%。交叉验证：Wood Mackenzie(2024) 低 28%，Rystad Energy(2025) 低 30-40%，国际商报(2026) 低约 1/3。取保守中位值。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td>
+    <td class="value-cell">0.70</td>
+    <td>10</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>发达市场本地采购溢价</td>
+    <td><span class="tag-scope">全局</span></td>
+    <td><span class="tag-client">—</span></td>
+    <td>JP/KR/AU/NZ 本地风电零部件市场小、供应商少、制造成本高。基于这些国家风电制造业规模有限且主要依赖进口的行业共识。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td>
+    <td class="value-cell">1.05</td>
+    <td>8</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>发展中市场本地采购折价</td>
+    <td><span class="tag-scope">全局</span></td>
+    <td><span class="tag-client">—</span></td>
+    <td>CN/ID/PH/TH/VN/PK 本地采购可能存在低人力成本优势。中国零部件国产化率超 95%（中信证券 2025）；东南亚/南亚本地制造能力弱，此值适用于当地确有供应能力的情况。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td>
+    <td class="value-cell">0.90</td>
+    <td>7</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>新喀里多尼亚远程溢价</td>
+    <td><span class="tag-scope">全局</span></td>
+    <td><span class="tag-client">—</span></td>
+    <td>NC 为法国海外领地，南太平洋偏远岛屿，无本地风电零部件制造业，"本地采购"实际为从 AU 或法国进口后的转售。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td>
+    <td class="value-cell">1.30</td>
+    <td>7</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+</tbody></table>
+
+<h3>A2. 运输费用 — 丹麦出发海运（倍数型，相对于零部件成本）</h3>
+<table>
+  <tbody><tr>
+    <th>规则名称</th><th>范围</th><th>客户代码</th><th>描述</th><th>类型</th><th>值</th><th>优先级</th><th>适用流程</th>
+  </tr>
+  <tr>
+    <td>丹麦→东亚海运</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>丹麦→JP/KR（航程 11,000–13,000 海里，经苏伊士/好望角）。叶片等超大件需散杂船（可达 18%），此值取常规零部件均值。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">0.12</td><td>9</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>丹麦→东南亚海运</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>丹麦→TH/VN/PH/ID（航程 12,000–15,000 海里）。比东亚高 2pp，因航程更长且部分港口需中转。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">0.14</td><td>9</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>丹麦→大洋洲海运</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>丹麦→AU/NZ（航程 13,000–16,000 海里）。丹麦出发最远航线。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">0.16</td><td>9</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>丹麦→巴基斯坦海运</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>丹麦→PK（经苏伊士至卡拉奇，航程 8,000–10,000 海里）。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">0.11</td><td>9</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>丹麦→新喀里多尼亚海运</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>丹麦→NC（南太平洋偏远岛屿，经巴拿马或好望角，航程 &gt; 16,000 海里）。全球最长风电物流航线之一。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">0.18</td><td>9</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+</tbody></table>
+
+<h3>A3. 运输费用 — 中国出发海运（倍数型，相对于零部件成本）</h3>
+<table>
+  <tbody><tr>
+    <th>规则名称</th><th>范围</th><th>客户代码</th><th>描述</th><th>类型</th><th>值</th><th>优先级</th><th>适用流程</th>
+  </tr>
+  <tr>
+    <td>中国→东亚海运</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>中国→JP/KR（航程 1–3 天，约 500–1,200 海里）。亚太区内短途海运，成本远低于丹麦出发。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">0.04</td><td>9</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>中国→东南亚海运</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>中国→TH/VN/PH/ID（航程 4–10 天，约 1,500–3,500 海里）。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">0.06</td><td>9</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>中国→大洋洲海运</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>中国→AU/NZ（航程 12–18 天，约 4,500–6,000 海里）。虽短于丹麦航线但距离可观。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">0.10</td><td>9</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>中国→巴基斯坦运输</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>中国→PK（海运经南海-马六甲-阿拉伯海约 5,000 海里，或中巴经济走廊陆运）。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">0.05</td><td>9</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+</tbody></table>
+
+<h3>A4. 运输费用 — 其他方式（倍数型）</h3>
+<table>
+  <tbody><tr>
+    <th>规则名称</th><th>范围</th><th>客户代码</th><th>描述</th><th>类型</th><th>值</th><th>优先级</th><th>适用流程</th>
+  </tr>
+  <tr>
+    <td>本地陆运成本</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>本地采购+陆路运输至风场。仅含陆运段。叶片等超大件公路运输需特种车辆（实际可达 5-8%），此值取常规零部件。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">0.03</td><td>8</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>空运相对海运费用倍数</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>空运费用约为海运 6.5 倍（取行业共识 5-8 倍中位值）。来源：佰越航服国际物流(2025)。注意：风电叶片通常无法空运。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">6.50</td><td>9</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>叶片空运不可行</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>主流货机（波音 747-8F）主货舱长 36.5m；陆上叶片平均 70-85m（2025 年），超大型达 131m（SANY 2024），远超货机限制。Radia WindRunner 尚在开发中未商用。若故障部件为 Blade，AI 自动排除空运方案。</td>
+    <td><span class="tag-type tag-type-upper">上限</span></td><td class="value-cell">0</td><td>10</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+</tbody></table>
+
+<h3>A5. 总部管理费（倍数型，相对于零部件成本）</h3>
+<table>
+  <tbody><tr>
+    <th>规则名称</th><th>范围</th><th>客户代码</th><th>描述</th><th>类型</th><th>值</th><th>优先级</th><th>适用流程</th>
+  </tr>
+  <tr>
+    <td>丹麦总部管理费</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>从丹麦总部调拨零部件，当地团队需承担管理费（覆盖总部仓储、质量认证、研发分摊、全球供应链协调）。来源：跨国风电制造商 intercompany 定价惯例 8-15%，取中位值。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">0.10</td><td>10</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>中国采购管理费</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>从中国子公司采购供亚太区使用，管理费显著低于丹麦（运营成本更低）。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">0.03</td><td>8</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>本地采购免管理费</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>在风机所在国本地采购，不经总部调拨，无管理费。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">0.00</td><td>10</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+</tbody></table>
+
+<h3>A6. 基础运输天数（加值型 — 用于罚款计算）</h3>
+<table>
+  <tbody><tr>
+    <th>规则名称</th><th>范围</th><th>客户代码</th><th>描述</th><th>类型</th><th>值</th><th>优先级</th><th>适用流程</th>
+  </tr>
+  <tr>
+    <td>丹麦海运基础天数</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>丹麦海运至各区域中值天数：→JP/KR 30d / →TH/VN/PH/ID 35d / →AU/NZ 40d / →PK 28d / →NC 45d。</td>
+    <td><span class="tag-type tag-type-additive">加值</span></td><td class="value-cell">30 / 35 / 40 / 28 / 45 天（按区域）</td><td>8</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>中国海运基础天数</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>中国海运至各区域中值天数：→JP/KR 5d / →TH/VN/PH/ID 10d / →AU/NZ 18d / →PK 10d。</td>
+    <td><span class="tag-type tag-type-additive">加值</span></td><td class="value-cell">5 / 10 / 18 / 10 天（按区域）</td><td>8</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>空运基础天数</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>空运至亚太区任何目的地（含货物集结、报关、飞行、清关、末端陆运）：丹麦出发 5d / 中国出发 2d。</td>
+    <td><span class="tag-type tag-type-additive">加值</span></td><td class="value-cell">5 / 2 天（丹麦/中国出发）</td><td>8</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>本地陆运基础天数</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>风机所在国本地陆运至风场中值天数（日本/韩国/新西兰 2-3d，中国/印尼/巴基斯坦 3-5d，泰国/越南/菲律宾 1-3d）。</td>
+    <td><span class="tag-type tag-type-additive">加值</span></td><td class="value-cell">3（全局中值）</td><td>7</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+</tbody></table>
+
+<!-- ============================================================ -->
+<h2>B. 国家时效敏感度</h2>
+<p style="font-size:14px;color:#6b7280;margin:-8px 0 12px 0;">该倍数作用于罚款在方案决策中的权重，非改变用户输入的每日罚款额。权重越高，AI 越倾向于优先规避罚款的采购/运输方案。</p>
+<table>
+  <tbody><tr>
+    <th>规则名称</th><th>范围</th><th>客户代码</th><th>描述</th><th>类型</th><th>值</th><th>优先级</th><th>适用流程</th>
+  </tr>
+  <tr>
+    <td>日本最高时效敏感度</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>日本商业文化对时效极为严苛。日本民法第 420 条允许 penalty 与 LD 叠加（不同于普通法系）。NEDO 数据库显示日本风机 downtime 比欧洲长约 50%，可用率仅 87.4%。来源：Freshfields 2026；NEDO(Kikuchi &amp; Ishihara)。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">1.30</td><td>10</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>韩国高层时效敏感度</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>类似日本，合同执行力强，O&amp;M 合同多引入国际标准 SLA。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">1.25</td><td>10</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>澳新基准时效敏感度</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>成熟普通法体系，LD 需满足"真实预估损失"（Dunlop 标准）。罚款权重基准。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">1.00</td><td>10</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>中国中等偏低时效敏感度</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>全球最大风电市场（2024 累计 5.61 亿千瓦），竞争激烈，LD 条款普遍但执行中协商空间较大。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">0.85</td><td>8</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>泰国中等时效敏感度</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>法律体系受普通法和本地法双重影响，相对成熟但执行效率中等。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">0.90</td><td>8</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>越南中等偏低时效敏感度</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>《建设法 2025》（2026.07 生效）首次承认 LD 概念，但上限为违约义务价值的 8%。来源：Freshfields 2026。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">0.80</td><td>8</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>菲律宾中等偏低时效敏感度</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>风电市场起步晚，台风频繁客观上使双方对延误容忍度略高。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">0.80</td><td>7</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>印度尼西亚偏低时效敏感度</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>风电市场早期，基础设施和供应链不成熟，法律执行流程较长，市场对延误容忍度偏高。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">0.75</td><td>7</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>巴基斯坦最低时效敏感度</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>法律执行和合同保障体系相对薄弱，基础设施制约明显，双方对延误容忍度最高。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">0.70</td><td>7</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>新喀里多尼亚基准时效敏感度</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>法国海外领地，适用法国/欧盟法律框架，LD 需合理预估损失。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">1.00</td><td>8</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+</tbody></table>
+
+<!-- ============================================================ -->
+<h2>C. 台风影响</h2>
+<p style="font-size:14px;color:#6b7280;margin:-8px 0 12px 0;">核心数据来源：STI/CMA 2024 西北太平洋 TC 年报（26 个命名 TC，8-9 月 14 个）；UNCTAD 港口韧性报告；Transitainer WA(2025，SuperTY Yagi 18 天延迟）；JOC.com(2025, Ragasa 华南港口关闭）；Dimerco(2025.10) 亚太空运报告。</p>
+<table>
+  <tbody><tr>
+    <th>规则名称</th><th>范围</th><th>客户代码</th><th>描述</th><th>类型</th><th>值</th><th>优先级</th><th>适用流程</th>
+  </tr>
+  <tr>
+    <td>台风季峰值期海运 Buffer</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>7 月 1 日–10 月 31 日，NW Pacific 全年约 70% TC 此时生成。2024 年 8-9 月 14 个 TC（6 个 SuperTY）。中国港口每 3-5 天一次台风级中断。途经/到达 CN/JP/KR/PH/VN/TH/TW 港口的海运 +10 天。</td>
+    <td><span class="tag-type tag-type-additive">加值</span></td><td class="value-cell">+10 天</td><td>9</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>台风季肩峰期海运 Buffer</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>6 月、11 月 TC 活动显著低于峰值但仍活跃。2024 年 11 月 4 个 SuperTY（Yinxing/Man-Yi/Usagi/Toraji）。受影响区域同上。</td>
+    <td><span class="tag-type tag-type-additive">加值</span></td><td class="value-cell">+5 天</td><td>8</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>台风季低谷期免 Buffer</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>12 月–次年 5 月 NW Pacific TC 活动极少，海运不叠加台风 buffer。</td>
+    <td><span class="tag-type tag-type-additive">加值</span></td><td class="value-cell">0 天</td><td>8</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>台风直接受影响区域</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>定义台风直接受影响的国家/地区列表：CN（华南/华东）、JP（全境）、KR（南部及济州）、PH（全境）、VN（中北部）、TH（暹罗湾）、TW。这些区域的海运航线在台风季应用峰值期/肩峰期 Buffer。</td>
+    <td><span class="tag-type tag-type-label">标记规则</span></td><td class="value-cell">—（定义分类）</td><td>9</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>台风间接影响区域</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>ID（北部）/PK（卡拉奇港）不受台风直接袭击，但台风季可致区域转运枢纽拥堵溢出和设备短缺。峰值期 +3 天。AU/NZ/NC 不受影响（南半球气旋季节相反，11-4 月），不叠加。</td>
+    <td><span class="tag-type tag-type-additive">加值</span></td><td class="value-cell">+3 天（仅峰值期）</td><td>7</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+  <tr>
+    <td>台风季空运 Buffer</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>空运同样受台风影响。SuperTY Ragasa(2025.09) 导致珠三角/香港机场全部取消，Dimerco 确认台风季空运运力紧张、积压 3-7 天。峰值期 +3d / 肩峰期 +1d。</td>
+    <td><span class="tag-type tag-type-additive">加值</span></td><td class="value-cell">+3 / +1 天（峰值/肩峰）</td><td>7</td>
+    <td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+  </tr>
+</tbody></table>
+
+<div class="note">
+  <strong>🔄 AI 使用逻辑</strong>：案例创建时的系统当前日期决定适用时段。若工程师在补充提示词中声明「已包含天气余量」，则不叠加台风 buffer。
+</div>
+
+<!-- ============================================================ -->
+<h2>D. 历史数据处理</h2>
+<table>
+  <tbody><tr>
+    <th>规则名称</th><th>范围</th><th>客户代码</th><th>描述</th><th>类型</th><th>值</th><th>优先级</th><th>适用流程</th>
+  </tr>
+  <tr>
+    <td>同机型同部件价格取中位数</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>同一 Platform+Component 的同一 CostGroup 存在多条价格记录时，AI 使用中位数而非均值。原因：历史数据可能含极端异常值（紧急采购、错误录入），中位数天然抗异常，更稳健反映"典型"价格。AI 在依据说明中展示：记录数、中位数、最大/最小值、样本标准差。</td>
+    <td><span class="tag-type tag-type-stat">统计策略</span></td><td class="value-cell">中位数</td><td>10</td>
+    <td><span class="tag-flow tag-flow-create">创建案例</span></td>
+  </tr>
+  <tr>
+    <td>异常值检测 3×MAD</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>在计算中位数前，AI 检测偏离中位数超 3 倍 MAD 的记录，标记为 ⚠️ 异常值并剔除（不参与中位数计算）。若剔除后有效记录 &lt; 3 条，AI 标记「有效历史记录不足」并建议人工输入。目标剔除比例：3-8%。</td>
+    <td><span class="tag-type tag-type-detect">检测规则</span></td><td class="value-cell">3×MAD</td><td>10</td>
+    <td><span class="tag-flow tag-flow-create">创建案例</span></td>
+  </tr>
+  <tr>
+    <td>历史数据默认丹麦采购源</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>导入的历史成本记录默认视为从丹麦总部采购。AI 以此中位数作为丹麦采购价（基准 ×1.00）。理由：公司全球供应链以丹麦为中心；数据无"采购源"列。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">1.00</td><td>10</td>
+    <td><span class="tag-flow tag-flow-create">创建案例</span></td>
+  </tr>
+  <tr>
+    <td>运输成本异常检测</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>若某条记录的运输成本（Transport CostGroup）显著低于丹麦→该 SiteName 对应国家的规则值（低于丹麦海运规则值的 60%），AI 标记为「🟡 疑似非丹麦采购（运输成本异常低）」。不自动重新分类，仅提示工程师审查。</td>
+    <td><span class="tag-type tag-type-lower">下限</span></td><td class="value-cell">规则值 × 0.60</td><td>8</td>
+    <td><span class="tag-flow tag-flow-create">创建案例</span></td>
+  </tr>
+  <tr>
+    <td>无时间标签等权处理</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>数据 14 列中无日期字段。AI 在聚合时所有匹配记录等权。AI 必须在每个推断字段的依据说明中标注「⚠️ 数据无时间维度，所有等权处理。若数据跨越多年，远期价格可能与当前市场价存在偏差」。</td>
+    <td><span class="tag-type tag-type-multiplier">倍数</span></td><td class="value-cell">1.00（等权）</td><td>10</td>
+    <td><span class="tag-flow tag-flow-create">创建案例</span></td>
+  </tr>
+  <tr>
+    <td>最小样本量阈值</td>
+    <td><span class="tag-scope">全局</span></td><td><span class="tag-client">—</span></td>
+    <td>≥ 10 条 → ✅ 正常推断；3–9 条 → 🟡 低样本标注，建议核实；&lt; 3 条 → 🔴 不自动填值，提示手动输入并尝试跨平台引用同 Component 数据（标记「📐 跨平台参考」）。</td>
+    <td><span class="tag-type tag-type-lower">下限</span></td><td class="value-cell">10 / 3（条）</td><td>10</td>
+    <td><span class="tag-flow tag-flow-create">创建案例</span></td>
+  </tr>
+</tbody></table>
+
+<!-- ============================================================ -->
+<h2>规则一览表</h2>
+
+<table>
+  <tbody><tr>
+    <th>组</th><th>规则数</th><th>适用范围</th><th>核心内容</th>
+  </tr>
+  <tr>
+    <td>A</td><td>24</td><td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+    <td>零部件成本（采购地×5）、运输费用（海/陆/空×区域×13）、管理费（×3）、基础运输天数（×4）</td>
+  </tr>
+  <tr>
+    <td>B</td><td>10</td><td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+    <td>国家时效敏感度罚款权重（0.70~1.30，按 11 国）</td>
+  </tr>
+  <tr>
+    <td>C</td><td>6</td><td><span class="tag-flow tag-flow-solution">生成方案</span></td>
+    <td>台风季天数 Buffer（0~+10d，按季节+区域）</td>
+  </tr>
+  <tr>
+    <td>D</td><td>6</td><td><span class="tag-flow tag-flow-create">创建案例</span></td>
+    <td>历史数据中位数聚合、异常值检测、等权处理、最小样本量</td>
+  </tr>
+  <tr>
+    <td><strong>合计</strong></td><td><strong>46</strong></td><td>—</td><td>—</td>
+  </tr>
+</tbody></table>
+
+<h3>类型分布</h3>
+<table style="width:60%;">
+  <tbody><tr><th>类型</th><th>规则数</th><th>说明</th></tr>
+  <tr><td><span class="tag-type tag-type-multiplier">倍数</span></td><td>27</td><td>成本相对倍数、权重倍数</td></tr>
+  <tr><td><span class="tag-type tag-type-additive">加值</span></td><td>11</td><td>天数累加 Base 或 Buffer</td></tr>
+  <tr><td><span class="tag-type tag-type-upper">上限</span></td><td>1</td><td>叶片不可空运（值=0）</td></tr>
+  <tr><td><span class="tag-type tag-type-lower">下限</span></td><td>2</td><td>运输成本异常检测阈值 + 最小样本量</td></tr>
+  <tr><td><span class="tag-type tag-type-stat">统计策略</span> ⭐</td><td>1</td><td>取中位数（新类型）</td></tr>
+  <tr><td><span class="tag-type tag-type-detect">检测规则</span> ⭐</td><td>1</td><td>3×MAD 异常值检测（新类型）</td></tr>
+  <tr><td><span class="tag-type tag-type-label">标记规则</span> ⭐</td><td>1</td><td>台风区域分类（新类型）</td></tr>
+</tbody></table>
+
+<div class="note">
+  <strong>📋 适用流程说明</strong>：<span style="background:#f0fdf4;padding:2px 6px;border:1px solid #86efac;border-radius:4px;">创建案例</span> 规则的 6 条全部为 <strong>D 组（历史数据处理）</strong>，在 AI 对导入的 Excel 数据进行清洗、聚合、推断时执行。其余 40 条规则在 AI 生成维修对比方案（第 6 节）时执行，用于方案成本计算、运输时效评估和综合评分。
+</div>
+
+
+
+</body></html>

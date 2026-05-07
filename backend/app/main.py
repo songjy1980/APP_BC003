@@ -44,23 +44,30 @@ async def seed_data():
             db.add(AIConfig(id=1))
 
         result = await db.execute(select(Rule))
-        if not result.scalar():
-            default_rules = [
-                Rule(name="日本客户时效敏感", description="日本客户对时效敏感，罚款通常较高，优先考虑空运",
-                     scope="global", rule_type="multiply", rule_value=1.0, priority=10, enabled=1),
-                Rule(name="Gearbox需大型吊车", description="Gearbox维修通常需要大型吊车，吊车成本占比参考历史数据均值",
-                     scope="global", rule_type="multiply", rule_value=1.0, priority=9, enabled=1),
-                Rule(name="海运vs空运成本差", description="海运比空运平均便宜60-80%，但运输时间增加20-35天",
-                     scope="global", rule_type="multiply", rule_value=0.3, priority=8, enabled=1),
-                Rule(name="数据无日期等权处理", description="数据中无日期字段，所有历史记录等权处理",
-                     scope="global", rule_type="multiply", rule_value=1.0, priority=7, enabled=1),
-                Rule(name="JP-Wind-Phase2罚款上限", description="合同条款严格，罚款上限为合同总额的15%",
-                     scope="customer", customer_code="JP-Wind-Phase2", rule_type="cap", rule_value=0.15, priority=6, enabled=1),
-                Rule(name="台风季节东南亚buffer", description="台风季节(6-10月)：东南亚地区海运时间需额外增加7-14天",
-                     scope="customer", rule_type="add", rule_value=10.0, priority=5, enabled=1),
-            ]
-            for r in default_rules:
-                db.add(r)
+        existing_rules = result.scalars().all()
+        from app.services.rule_parser import parse_rule_html
+        import os
+        rule_html_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+                                       "模块 6：知识与规则沉淀 — 预置规则全集（更新版）.html")
+        if os.path.exists(rule_html_path):
+            html_rules = parse_rule_html(rule_html_path)
+            if html_rules:
+                for old_rule in existing_rules:
+                    await db.delete(old_rule)
+                for r in html_rules:
+                    db.add(Rule(
+                        name=r["name"],
+                        description=r["description"],
+                        scope=r["scope"],
+                        customer_code=r.get("customer_code"),
+                        applicable_flow=r.get("applicable_flow", ""),
+                        rule_type=r["rule_type"],
+                        rule_value=r["rule_value"],
+                        condition_json=r.get("condition_json"),
+                        priority=r["priority"],
+                        enabled=r["enabled"],
+                    ))
+                await db.flush()
 
         await db.commit()
 

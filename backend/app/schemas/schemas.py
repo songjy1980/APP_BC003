@@ -154,6 +154,7 @@ class RuleCreateSchema(BaseModel):
     scope: str = "global"
     customer_code: Optional[str] = None
     cost_category: Optional[str] = None
+    applicable_flow: Optional[str] = None
     rule_type: str
     rule_value: float
     condition_json: Optional[str] = None
@@ -168,6 +169,7 @@ class RuleSchema(BaseModel):
     scope: str
     customer_code: Optional[str] = None
     cost_category: Optional[str] = None
+    applicable_flow: Optional[str] = None
     rule_type: str
     rule_value: float
     condition_json: Optional[str] = None

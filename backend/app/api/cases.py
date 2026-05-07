@@ -152,7 +152,7 @@ async def infer_costs(case_id: int, db: AsyncSession = Depends(get_db)):
     mappings = mappings_result.scalars().all()
 
     rules_result = await db.execute(
-        select(Rule).where(Rule.enabled == 1).order_by(Rule.priority)
+        select(Rule).where(Rule.enabled == 1, Rule.applicable_flow == "create_case").order_by(Rule.priority)
     )
     rules = rules_result.scalars().all()
     rules_dicts = [
@@ -265,7 +265,7 @@ async def generate_plans(case_id: int, db: AsyncSession = Depends(get_db)):
     ]
 
     rules_result = await db.execute(
-        select(Rule).where(Rule.enabled == 1).order_by(Rule.priority)
+        select(Rule).where(Rule.enabled == 1, Rule.applicable_flow == "generate_plan").order_by(Rule.priority)
     )
     rules = rules_result.scalars().all()
     rules_dicts = [

@@ -282,9 +282,22 @@ async def generate_plans(case_id: int, db: AsyncSession = Depends(get_db)):
         select(Rule).where(Rule.enabled == 1, Rule.applicable_flow == "generate_plan").order_by(Rule.priority)
     )
     rules = rules_result.scalars().all()
-    rules_dicts = [
-        {"scope": r.scope, "name": r.name, "description": r.description}
+    rules_objs = [
+        {
+            "id": r.id, "name": r.name, "description": r.description,
+            "scope": r.scope, "rule_type": r.rule_type, "rule_value": r.rule_value,
+            "cost_category": r.cost_category or "", "condition_json": r.condition_json,
+            "priority": r.priority, "enabled": r.enabled,
+        }
         for r in rules
+    ]
+
+    plan_definitions = [
+        {"plan_type": "denmark_sea",     "plan_label": "方案1：丹麦采购+海运", "source": "denmark", "transport": "sea"},
+        {"plan_type": "denmark_air",     "plan_label": "方案2：丹麦采购+空运", "source": "denmark", "transport": "air"},
+        {"plan_type": "china_sea",      "plan_label": "方案3：中国采购+海运", "source": "china", "transport": "sea"},
+        {"plan_type": "china_air",      "plan_label": "方案4：中国采购+空运", "source": "china", "transport": "air"},
+        {"plan_type": "local_land",     "plan_label": "方案5：本地采购+陆运", "source": "local", "transport": "land"},
     ]
 
     case_dict = {
@@ -297,28 +310,31 @@ async def generate_plans(case_id: int, db: AsyncSession = Depends(get_db)):
     }
 
     async def generate_sse():
-        yield f"data: {json.dumps({'type': 'progress', 'message': '正在生成三方案对比...'})}\n\n"
+        yield f"data: {json.dumps({'type': 'progress', 'message': '规则引擎计算5方案...'})}\n\n"
 
-        use_fallback = False
-        try:
-            ai_result = await ai_service.infer_plans(
-                case_dict, cost_items_dicts, rules_dicts, case.engineer_notes or ""
-            )
-            plans_data = ai_result.get("plans", [])
-            if not plans_data:
-                use_fallback = True
-        except Exception as e:
-            yield f"data: {json.dumps({'type': 'progress', 'message': f'AI 调用失败({str(e)[:80]})，使用规则引擎生成方案'})}\n\n"
-            use_fallback = True
+        from app.services.rule_engine import RuleEngine
+        engine = RuleEngine(rules_objs)
 
-        if use_fallback:
-            plans_data = _generate_fallback_plans(cost_items_dicts, case_dict)
+        country = case.country or ""
+        component = case.component or ""
+        penalty_per_day = case.penalty_amount_eur or 0
+        repair_hours = case.repair_duration_hours or 0
 
-        existing_plans = (await db.execute(
-            select(Plan).where(Plan.case_id == case_id)
-        )).scalars().all()
-        for plan in existing_plans:
-            await db.delete(plan)
+        plans_data = []
+        for pd in plan_definitions:
+            plan = engine.compute_plan(pd, cost_items_dicts, country, component, penalty_per_day, repair_hours)
+            plans_data.append(plan)
+
+        confidences = [ci.get("confidence", 0.5) or 0.5 for ci in cost_items_dicts]
+        avg_conf = sum(confidences) / len(confidences) if confidences else 0.5
+        plans_data = engine.compute_all_scores(plans_data, avg_conf)
+        plans_data.sort(key=lambda p: -(p.get("composite_score", 0)))
+        for i, p in enumerate(plans_data):
+            p["comparison_rank"] = i + 1
+
+        existing_plans = (await db.execute(select(Plan).where(Plan.case_id == case_id))).scalars().all()
+        for p in existing_plans:
+            await db.delete(p)
 
         for plan_data in plans_data:
             plan = Plan(
@@ -327,8 +343,12 @@ async def generate_plans(case_id: int, db: AsyncSession = Depends(get_db)):
                 plan_label=plan_data.get("plan_label", ""),
                 total_cost_eur=plan_data.get("total_cost_eur"),
                 total_duration_days=plan_data.get("total_duration_days"),
+                penalty_amount_eur=plan_data.get("penalty_amount_eur"),
                 comparison_rank=plan_data.get("comparison_rank"),
-                ai_reasoning=plan_data.get("reasoning"),
+                composite_score=plan_data.get("composite_score"),
+                is_feasible=1 if plan_data.get("is_feasible") else 0,
+                infeasibility_reason=plan_data.get("infeasibility_reason", ""),
+                ai_reasoning=plan_data.get("ai_reasoning"),
             )
             db.add(plan)
             await db.flush()
@@ -337,16 +357,53 @@ async def generate_plans(case_id: int, db: AsyncSession = Depends(get_db)):
                 plan_item = PlanCostItem(
                     plan_id=plan.id,
                     business_cost_category=item_data.get("business_cost_category", ""),
+                    cost_subtype=item_data.get("cost_subtype"),
                     estimated_value=item_data.get("estimated_value"),
-                    ai_reasoning=item_data.get("reasoning"),
+                    ai_reasoning=item_data.get("ai_reasoning"),
                 )
                 db.add(plan_item)
 
         case.status = "plans_generated"
         await db.commit()
 
-        yield f"data: {json.dumps({'type': 'progress', 'message': '三方案生成完成' + ('(规则引擎)' if use_fallback else '(AI)')})}\n\n"
-        yield f"data: {json.dumps({'type': 'result', 'data': {'case_id': case_id, 'plans': plans_data}})}\n\n"
+        yield f"data: {json.dumps({'type': 'progress', 'message': '规则引擎计算完成，调用AI润色与校验...'})}\n\n"
+
+        ai_success = False
+        try:
+            ai_plan_result = await ai_service.infer_plans_validate(
+                case_dict, plans_data, rules_objs, case.engineer_notes or ""
+            )
+            ai_plans = ai_plan_result.get("plans", [])
+            if ai_plans:
+                for i, ap in enumerate(ai_plans):
+                    if i < len(plans_data):
+                        plans_data[i]["ai_reasoning"] = ap.get("reasoning", "")
+                        plans_data[i]["composite_score"] = ap.get("composite_score", plans_data[i].get("composite_score"))
+                        for j, ai in enumerate(ap.get("items", [])):
+                            if j < len(plans_data[i].get("items", [])):
+                                plans_data[i]["items"][j]["ai_reasoning"] = ai.get("reasoning", "")
+
+                reloaded = (await db.execute(select(Plan).where(Plan.case_id == case_id))).scalars().all()
+                for plan_obj in reloaded:
+                    for i, pd_item in enumerate(plans_data):
+                        if plan_obj.plan_type == pd_item.get("plan_type"):
+                            plan_obj.ai_reasoning = pd_item.get("ai_reasoning")
+                            plan_obj.composite_score = pd_item.get("composite_score")
+                            break
+                await db.commit()
+                ai_success = True
+        except Exception:
+            pass
+
+        method = "AI校验" if ai_success else "规则引擎"
+        yield f"data: {json.dumps({'type': 'progress', 'message': f'方案生成完成 ({method})'})}\n\n"
+
+        plan_summary = [
+            {"label": p["plan_label"], "total_eur": p.get("total_cost_eur"),
+             "score": p.get("composite_score"), "feasible": p.get("is_feasible")}
+            for p in plans_data
+        ]
+        yield f"data: {json.dumps({'type': 'result', 'data': {'case_id': case_id, 'plans': plan_summary}})}\n\n"
 
     return StreamingResponse(generate_sse(), media_type="text/event-stream")
 

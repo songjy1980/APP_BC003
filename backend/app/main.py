@@ -7,7 +7,7 @@ from app.api.data import router as data_router
 from app.api.cases import router as cases_router
 from app.api.rules import router as rules_router
 from app.api.ai import router as ai_router
-from app.models.models import AIConfig, SiteCountryMap, Rule
+from app.models.models import AIConfig, SiteCountryMap, Rule, ScoringWeight
 
 
 @asynccontextmanager
@@ -60,6 +60,7 @@ async def seed_data():
                         description=r["description"],
                         scope=r["scope"],
                         customer_code=r.get("customer_code"),
+                        cost_category=r.get("cost_category", ""),
                         applicable_flow=r.get("applicable_flow", ""),
                         rule_type=r["rule_type"],
                         rule_value=r["rule_value"],
@@ -68,6 +69,13 @@ async def seed_data():
                         enabled=r["enabled"],
                     ))
                 await db.flush()
+
+        result = await db.execute(select(ScoringWeight))
+        if not result.scalar():
+            db.add(ScoringWeight(id=1, factor_name="total_cost", factor_label="总成本", weight=50))
+            db.add(ScoringWeight(id=2, factor_name="penalty_risk", factor_label="罚款风险", weight=25))
+            db.add(ScoringWeight(id=3, factor_name="confidence", factor_label="数据置信度", weight=15))
+            db.add(ScoringWeight(id=4, factor_name="stability", factor_label="方案稳定性", weight=10))
 
         await db.commit()
 

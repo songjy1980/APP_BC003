@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<!-- saved from url=(0478)https://lobechat-cloud.d35842305b91be4b48e06ff9a9ad83f5.r2.cloudflarestorage.com/code-interpreter-exports/2026-05-07/tpc_8fRnnG7g5Sbe/prd_v0.4.html?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=f6ccfc7b3525564c0e473abfda403fe7%2F20260507%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260507T045535Z&X-Amz-Expires=300&X-Amz-Signature=79c68f935aeb376d73e3299d267db64c71f7998c63a41051fb3d23e69034be5c&X-Amz-SignedHeaders=host&x-id=GetObject -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>风力发电机组运维 Business Case 分析平台 — 功能需求规格 v0.4</title>
+<style>
+:root {
+    --bg: #ffffff; --text: #1a1a2e; --heading: #0d1b2a; --accent: #1b6b87;
+    --border: #d0d7de; --code-bg: #f6f8fa; --table-stripe: #f0f6fc;
+    --blockquote: #eef5fa; --blockquote-border: #1b6b87;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.75;
+    max-width: 960px; margin: 0 auto; padding: 40px 32px 80px;
+}
+h1 { font-size: 2em; color: var(--heading); border-bottom: 2px solid var(--accent); padding-bottom: 12px; margin: 32px 0 20px; }
+h2 { font-size: 1.5em; color: var(--heading); margin: 36px 0 16px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+h3 { font-size: 1.2em; color: var(--accent); margin: 28px 0 12px; }
+h4 { font-size: 1.05em; color: #2c3e50; margin: 20px 0 10px; }
+p { margin: 10px 0; }
+ul, ol { padding-left: 24px; margin: 8px 0; }
+li { margin: 4px 0; }
+strong { color: #0d1b2a; }
+code {
+    background: var(--code-bg); padding: 2px 6px; border-radius: 4px;
+    font-family: "SF Mono", "Fira Code", Consolas, monospace; font-size: 0.9em;
+}
+pre {
+    background: var(--code-bg); padding: 16px; border-radius: 8px; overflow-x: auto;
+    font-size: 0.85em; line-height: 1.5; margin: 12px 0; border: 1px solid var(--border);
+}
+pre code { background: none; padding: 0; }
+blockquote {
+    background: var(--blockquote); border-left: 4px solid var(--blockquote-border);
+    padding: 12px 16px; margin: 16px 0; border-radius: 0 6px 6px 0; color: #2c3e50;
+}
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.92em; }
+th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: #e8f0f8; font-weight: 600; color: var(--heading); }
+tr:nth-child(even) td { background: var(--table-stripe); }
+hr { border: none; border-top: 1px solid #b0bec5; margin: 32px 0; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+@media print { body { max-width: 100%; padding: 20px; } pre, blockquote { break-inside: avoid; } }
+</style>
+</head>
+<body>
+<h1>风力发电机组运维 Business Case 分析平台 — 功能需求规格</h1>
+
+<h2>1. 项目概述</h2>
+
+<h3>1.1 项目目标</h3>
+
+<p>建立一个 AI 驱动的内部网站，用于对公司与亚太区客户签订的风力发电机组运维服务合同进行 <strong>Business Case 分析</strong>。核心目标：在发生维修事件时，AI 综合评估各项成本要素与风险因素， <strong>自主生成可行的维修方案并进行对比，给出总成本 + 风险综合评分最优的推荐方案</strong>。</p>
+
+<h3>1.2 核心价值</h3>
+
+<ul><li>**AI 全链路驱动**：从数据提取、方案生成、成本填充到最终推荐，全流程由 AI 主导，减少人工经验依赖。</li><li>**降低维修总成本**：AI 自动分析历史数据与网络信息，推荐最优零部件来源、运输方式和资源配置。</li><li>**规避罚款风险**：将客户合同规定的维修时限与罚款条款纳入综合评分，避免"只看直接成本、忽略罚款"的决策偏差。</li><li>**数据资产化**：将公司历年积累的 Excel 维修数据系统化管理，让 AI 从中提取规律和参考值。</li><li>**知识补全**：当数据库无历史记录时，AI 自动通过网络搜索获取行业参考值填充，确保分析不中断。</li><li>**灵活适配**：支持不同风机平台、型号、国家、项目、合同类型，适配亚太区多市场场景。</li></ul>
+
+<h3>1.3 用户范围</h3>
+
+<p>所有内部用户使用同一套功能，不区分角色和权限层级。</p>
+
+<hr>
+
+<h2>2. AI 模型设置模块</h2>
+
+<p>用户可配置 AI 引擎，支持两种模式：</p>
+
+<table>
+<tbody><tr>
+<th>设置项</th>
+<th>说明</th>
+</tr>
+<tr>
+<td>**模型来源**</td>
+<td>单选：① Ollama 本地模型；② 外部商业 API</td>
+</tr>
+<tr>
+<td>**Ollama 设置**</td>
+<td>服务地址、模型名称、超时时间</td>
+</tr>
+<tr>
+<td>**API 设置**</td>
+<td>API 端点 URL、API Key（加密存储）、模型名称、Temperature、Max Tokens</td>
+</tr>
+<tr>
+<td>**连接测试**</td>
+<td>一键测试当前 AI 配置是否可用，返回延迟和模型信息</td>
+</tr>
+</tbody></table>
+
+
+<blockquote>**注**：AI 模型承担三个职责——（1）从 Excel 数据中智能提取和结构化信息；（2）根据维修场景自主生成对比方案；（3）在方案中自动填充数值并给出综合评分与推荐。</blockquote>
+
+<hr>
+
+<h2>3. 数据库管理模块</h2>
+
+<h3>3.1 核心理念：AI 驱动的数据导入</h3>
+
+<p>不依赖预设的字段映射规则。用户上传 Excel 后，由 AI 模型完成：</p>
+
+<ol><li>**自动识别列含义**：AI 理解 Excel 每列的实际含义（支持中英文列名、甚至无标题行）</li><li>**智能数据清洗**：自动处理空值、异常值、单位不一致等问题</li><li>**结构化提取**：将非结构化/半结构化数据转化为系统标准字段</li><li>**用户确认机制**：AI 展示识别结果和映射建议，用户确认或手动修正后入库</li></ol>
+
+<h3>3.2 Excel 数据导入</h3>
+
+<table>
+<tbody><tr>
+<th>功能</th>
+<th>描述</th>
+</tr>
+<tr>
+<td>**上传**</td>
+<td>支持 `.xlsx` / `.xls` / `.csv` 格式批量上传</td>
+</tr>
+<tr>
+<td>**AI 解析**</td>
+<td>上传后自动调用 AI 模型，分析列含义、数据类型、异常值</td>
+</tr>
+<tr>
+<td>**映射预览**</td>
+<td>AI 展示"原始列 → 系统标准字段"的映射关系，附带置信度</td>
+</tr>
+<tr>
+<td>**用户修正**</td>
+<td>用户可手动调整 AI 映射结果，确认后入库</td>
+</tr>
+<tr>
+<td>**重复处理**</td>
+<td>检测重复记录，支持跳过/覆盖策略</td>
+</tr>
+<tr>
+<td>**历史版本**</td>
+<td>保留导入历史记录，支持回滚</td>
+</tr>
+</tbody></table>
+
+
+<h3>3.3 标准数据字段</h3>
+
+<h4>3.3.1 风机与合同信息</h4>
+
+<ul><li>平台名称</li><li>风机型号</li><li>所属国家</li><li>项目名称</li><li>风场名称</li><li>合同类型</li><li>客户名称</li></ul>
+
+<h4>3.3.2 故障信息</h4>
+
+<ul><li>故障类型/代码</li><li>故障描述</li><li>所需零部件清单（名称 + 数量）</li></ul>
+
+<h4>3.3.3 零部件成本</h4>
+
+<ul><li>零部件名称/编号</li><li>丹麦总部采购单价</li><li>当地采购单价</li><li>总部管理费用率（%）</li><li>币种（默认 EUR）</li></ul>
+
+<h4>3.3.4 运输成本</h4>
+
+<ul><li>海运单价（€/kg·km 或 €/次）</li><li>空运单价（€/kg·km 或 €/次）</li><li>陆运单价（€/kg·km 或 €/次）</li><li>运输天数预估（海运/空运/陆运）</li><li>出发地 → 目的地（距离 km）</li><li>零部件总重量（kg）</li></ul>
+
+<h4>3.3.5 吊车成本</h4>
+
+<ul><li>吊车型号</li><li>日租金</li><li>最低租用天数</li><li>合同折扣率（%）</li></ul>
+
+<h4>3.3.6 人力成本</h4>
+
+<ul><li>团队类型/规模</li><li>人天单价</li><li>标准维修人天数</li></ul>
+
+<h4>3.3.7 罚款参数</h4>
+
+<ul><li>合同约定维修时限（小时 或 天）</li><li>超时每日罚款额</li><li>罚款币种</li></ul>
+
+<h4>3.3.8 工具与其他</h4>
+
+<ul><li>工具名称</li><li>单次使用成本</li><li>其他费用项（杂项描述 + 金额）</li></ul>
+
+<h3>3.4 数据管理操作</h3>
+
+<ul><li>**查询/筛选**：按任意字段组合筛选历史维修记录</li><li>**手动增删改**：支持对单条记录的手动编辑</li><li>**导出**：导出筛选结果为 Excel/CSV</li><li>**统计概览**：总记录数、覆盖国家/风场数、最近更新时间</li></ul>
+
+<hr>
+
+<h2>4. AI 数据补全模块（无历史数据时的回退机制）</h2>
+
+<h3>4.1 触发条件</h3>
+
+<p>当数据库中没有与当前维修场景匹配的历史记录，AI 无法从历史数据中提取参考值时，自动触发网络搜索补全。</p>
+
+<h3>4.2 工作流程</h3>
+
+<pre><code>
+用户创建 Business Case → AI 查询数据库 → 数据充足？
+                                            ├── 是 → 基于历史数据填充
+                                            └── 否 → 触发网络搜索 → AI 整合搜索结果 → 填入（标注来源）
+</code></pre>
+
+<h3>4.3 网络搜索范围</h3>
+
+<p>AI 根据缺失字段，自动搜索以下信息源：</p>
+
+<table>
+<tbody><tr>
+<th>缺失数据</th>
+<th>搜索方向</th>
+</tr>
+<tr>
+<td>零部件价格</td>
+<td>行业采购平台、供应商公开报价、行业报告</td>
+</tr>
+<tr>
+<td>运输成本</td>
+<td>国际货运费率参考（海运/空运/陆运）</td>
+</tr>
+<tr>
+<td>吊车日租金</td>
+<td>亚太区起重机租赁市场参考价</td>
+</tr>
+<tr>
+<td>人力成本</td>
+<td>目标国家风电行业技术工人日薪参考</td>
+</tr>
+<tr>
+<td>运输时效</td>
+<td>港口-港口海运时效、空运时效参考</td>
+</tr>
+<tr>
+<td>罚款惯例</td>
+<td>风电运维行业 SLA 罚款参考区间</td>
+</tr>
+</tbody></table>
+
+
+<h3>4.4 结果呈现</h3>
+
+<ul><li>每个网络搜索填充的值**必须标注来源 URL 和搜索日期**</li><li>显示置信度等级（🟢高 / 🟡中 / 🔴低），基于信息来源的权威性和时效性</li><li>用户可手动覆盖任意 AI 填充值</li></ul>
+
+<hr>
+
+<h2>5. Business Case 创建模块</h2>
+
+<h3>5.1 用户输入（必需项）</h3>
+
+<p>用户只需输入维修场景的核心参数，其余由 AI 完成：</p>
+
+<table>
+<tbody><tr>
+<th>输入项</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+<tr>
+<td>风力发电机所属平台</td>
+<td>下拉/文本</td>
+<td>如 Vestas、SGRE、GE 等</td>
+</tr>
+<tr>
+<td>风力发电机型号</td>
+<td>下拉/文本</td>
+<td>具体型号</td>
+</tr>
+<tr>
+<td>所属国家</td>
+<td>下拉</td>
+<td>亚太区国家列表</td>
+</tr>
+<tr>
+<td>所属项目名称</td>
+<td>文本</td>
+<td></td>
+</tr>
+<tr>
+<td>风场名称</td>
+<td>文本</td>
+<td></td>
+</tr>
+<tr>
+<td>所签合同类型</td>
+<td>下拉</td>
+<td>如全包、半包、按次计费等</td>
+</tr>
+<tr>
+<td>故障描述/类型</td>
+<td>文本/下拉</td>
+<td>需要维修的具体问题，支持自然语言描述</td>
+</tr>
+<tr>
+<td>合同约定维修时限</td>
+<td>数字 + 单位</td>
+<td>小时 或 天</td>
+</tr>
+<tr>
+<td>超时每日罚款额</td>
+<td>数字</td>
+<td>货币单位可配置（默认 €）</td>
+</tr>
+<tr>
+<td>所需零部件清单</td>
+<td>动态表格</td>
+<td>零部件名称 × 数量，支持增删行；也可由 AI 根据故障描述自动推断</td>
+</tr>
+</tbody></table>
+
+
+<h3>5.2 AI 分析流程</h3>
+
+<p>用户点击 <strong>"AI 分析"</strong>   后，AI 依次执行：</p>
+
+<pre><code>
+步骤 1 — 理解维修场景
+   ├─ 解析故障描述，识别故障类型
+   ├─ 确认所需零部件清单（若用户未完整填写，AI 自动补全）
+   └─ 提取关键约束（时限、罚款、国家位置等）
+
+步骤 2 — 获取成本数据
+   ├─ 查询历史数据库（优先级最高）
+   ├─ 数据库无记录时触发网络搜索
+   └─ 为每个数据点标注来源和置信度
+
+步骤 3 — 自主生成对比方案（详见第 6 节）
+   ├─ AI 根据预置规则，固定生成 5 个标准方案
+   ├─ 每个方案定义：零部件来源策略、运输方式组合、吊车/人力配置
+   └─ 填充各方案的成本数值，标记不可行方案
+
+步骤 4 — 综合评分与推荐（详见第 7 节）
+   ├─ 计算各方案总成本（含罚款）
+   ├─ 按综合评分模型打分
+   └─ 输出推荐结论和风险提示
+</code></pre>
+
+<hr>
+
+<h2>6. AI 自主方案生成模块</h2>
+
+<h3>6.1 核心设计原则</h3>
+
+<blockquote>**AI 固定生成 5 个标准对比方案**，覆盖零部件来源与运输方式的所有现实可行组合。AI 不再自主判断"生成几个方案"，而是将精力集中在成本填充、约束评估和综合评分上。</blockquote>
+
+<p>AI 作为决策引擎，分析输入参数后：</p>
+
+<ul><li>**方案数量**：固定为 5 个标准方案，覆盖零部件来源 × 运输方式的所有可行组合</li><li>**方案定义**：零部件来源（丹麦 / 中国 / 本地）与运输方式（海运 / 空运 / 陆运）的笛卡尔积，排除明显不合理的组合</li><li>**为什么选这些方案来对比**：5 个方案已穷举所有现实的采购+运输组合，AI 无需额外判断"生不生成哪个方案"，直接填充成本并对比</li></ul>
+
+<h3>6.2 五个标准方案定义</h3>
+
+<table>
+<tbody><tr>
+<th>方案</th>
+<th>零部件来源</th>
+<th>运输方式</th>
+<th>适用场景</th>
+<th>典型时效</th>
+</tr>
+<tr>
+<td>**方案 1：丹麦采购+海运**</td>
+<td>丹麦总部</td>
+<td>国际海运</td>
+<td>非紧急、大批量、重型零部件</td>
+<td>长（丹麦→亚太 28-45 天）</td>
+</tr>
+<tr>
+<td>**方案 2：丹麦采购+空运**</td>
+<td>丹麦总部</td>
+<td>国际空运</td>
+<td>紧急、中小件、高罚款风险场景</td>
+<td>短（丹麦→亚太 5 天）</td>
+</tr>
+<tr>
+<td>**方案 3：中国采购+海运**</td>
+<td>中国子公司</td>
+<td>国际海运</td>
+<td>中等时效要求、零部件中国有供应</td>
+<td>中（中国→亚太 5-18 天）</td>
+</tr>
+<tr>
+<td>**方案 4：中国采购+空运**</td>
+<td>中国子公司</td>
+<td>国际空运</td>
+<td>紧急且中国有供应，需平衡成本与时效</td>
+<td>短（中国→亚太 2 天）</td>
+</tr>
+<tr>
+<td>**方案 5：本地采购+陆运**</td>
+<td>所在国当地</td>
+<td>本地陆运</td>
+<td>当地有供应、超紧急场景、避开关税</td>
+<td>最短（陆运 1-5 天）</td>
+</tr>
+</tbody></table>
+
+
+<blockquote>**排除规则**：若特定零部件在某来源地无供应（如泰国当地无齿轮箱供应商），AI 自动标记该方案中该项为「不可行」并在方案说明中注明原因。叶片（Blade）类零部件不可空运（参见预置规则「叶片空运不可行」），方案 2 和方案 4 自动标记「不可行」。</blockquote>
+
+<h3>6.3 方案生成逻辑</h3>
+
+<p>AI 在生成方案时，必须在界面中展示其推理过程（可折叠）。</p>
+
+<h3>6.4 方案数量规则</h3>
+
+<table>
+<tbody><tr>
+<th>场景</th>
+<th>AI 行为</th>
+</tr>
+<tr>
+<td>正常场景</td>
+<td>固定生成 5 个方案，每项标注「可行 / 不可行」</td>
+</tr>
+<tr>
+<td>有方案因供应链限制不可行</td>
+<td>AI 在对比表中保留该方案行，标记「不可行 + 原因」</td>
+</tr>
+<tr>
+<td>用户不满意 AI 方案</td>
+<td>用户可手动调整任一方案的参数，AI 负责填充成本和评分</td>
+</tr>
+</tbody></table>
+
+
+<h3>6.5 各方案成本对比表</h3>
+
+<table>
+<tbody><tr>
+<th>维度</th>
+<th>方案 1：丹麦+海运</th>
+<th>方案 2：丹麦+空运</th>
+<th>方案 3：中国+海运</th>
+<th>方案 4：中国+空运</th>
+<th>方案 5：本地+陆运</th>
+</tr>
+<tr>
+<td>**零部件来源**</td>
+<td>丹麦总部</td>
+<td>丹麦总部</td>
+<td>中国子公司</td>
+<td>中国子公司</td>
+<td>当地</td>
+</tr>
+<tr>
+<td>**国际运输**</td>
+<td>海运</td>
+<td>空运</td>
+<td>海运</td>
+<td>空运</td>
+<td>—</td>
+</tr>
+<tr>
+<td>**陆运**</td>
+<td>接驳陆运</td>
+<td>接驳陆运</td>
+<td>接驳陆运</td>
+<td>接驳陆运</td>
+<td>本地直运</td>
+</tr>
+<tr>
+<td>**零部件成本**</td>
+<td>€___</td>
+<td>€___</td>
+<td>€___</td>
+<td>€___</td>
+<td>€___</td>
+</tr>
+<tr>
+<td>**总部管理费**</td>
+<td>€___</td>
+<td>€___</td>
+<td>€___</td>
+<td>€___</td>
+<td>€0</td>
+</tr>
+<tr>
+<td>**海运成本**</td>
+<td>€___</td>
+<td>—</td>
+<td>€___</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>**空运成本**</td>
+<td>—</td>
+<td>€___</td>
+<td>—</td>
+<td>€___</td>
+<td>—</td>
+</tr>
+<tr>
+<td>**陆运成本**</td>
+<td>€___</td>
+<td>€___</td>
+<td>€___</td>
+<td>€___</td>
+<td>€___</td>
+</tr>
+<tr>
+<td>**吊车成本**</td>
+<td>€___</td>
+<td>€___</td>
+<td>€___</td>
+<td>€___</td>
+<td>€___</td>
+</tr>
+<tr>
+<td>**人力成本**</td>
+<td>€___</td>
+<td>€___</td>
+<td>€___</td>
+<td>€___</td>
+<td>€___</td>
+</tr>
+<tr>
+<td>**工具与其他**</td>
+<td>€___</td>
+<td>€___</td>
+<td>€___</td>
+<td>€___</td>
+<td>€___</td>
+</tr>
+<tr>
+<td>**直接成本小计**</td>
+<td>**€___**</td>
+<td>**€___**</td>
+<td>**€___**</td>
+<td>**€___**</td>
+<td>**€___**</td>
+</tr>
+<tr>
+<td>**运输总天数**</td>
+<td>___ 天</td>
+<td>___ 天</td>
+<td>___ 天</td>
+<td>___ 天</td>
+<td>___ 天</td>
+</tr>
+<tr>
+<td>**预计完成时间**</td>
+<td>___ 天</td>
+<td>___ 天</td>
+<td>___ 天</td>
+<td>___ 天</td>
+<td>___ 天</td>
+</tr>
+<tr>
+<td>**是否超时**</td>
+<td>是 / 否</td>
+<td>是 / 否</td>
+<td>是 / 否</td>
+<td>是 / 否</td>
+<td>是 / 否</td>
+</tr>
+<tr>
+<td>**罚款金额**</td>
+<td>€___</td>
+<td>€___</td>
+<td>€___</td>
+<td>€___</td>
+<td>€___</td>
+</tr>
+<tr>
+<td>**总成本（含罚款）**</td>
+<td>**€___**</td>
+<td>**€___**</td>
+<td>**€___**</td>
+<td>**€___**</td>
+<td>**€___**</td>
+</tr>
+<tr>
+<td>**综合评分**</td>
+<td>__/100</td>
+<td>__/100</td>
+<td>__/100</td>
+<td>__/100</td>
+<td>__/100</td>
+</tr>
+<tr>
+<td>**状态**</td>
+<td>可行 / 不可行</td>
+<td>可行 / 不可行</td>
+<td>可行 / 不可行</td>
+<td>可行 / 不可行</td>
+<td>可行 / 不可行</td>
+</tr>
+</tbody></table>
+
+
+<hr>
+
+<h2>7. 综合评分与推荐模块</h2>
+
+<h3>7.1 综合评分模型</h3>
+
+<table>
+<tbody><tr>
+<th>因子</th>
+<th>默认权重</th>
+<th>计算方式</th>
+</tr>
+<tr>
+<td>**总成本**（含罚款）</td>
+<td>50%</td>
+<td>归一化到 0-100 分，成本越低分越高</td>
+</tr>
+<tr>
+<td>**罚款风险**</td>
+<td>25%</td>
+<td>基于缓冲天数：缓冲 &gt; 7 天 = 低风险(100)，3-7 天 = 中风险(60)，&lt; 3 天 = 高风险(20)</td>
+</tr>
+<tr>
+<td>**数据置信度**</td>
+<td>15%</td>
+<td>AI 填充值的平均置信度（高=90 / 中=60 / 低=30）</td>
+</tr>
+<tr>
+<td>**方案稳定性**</td>
+<td>10%</td>
+<td>运输方式可靠性、供应商稳定性等综合评估</td>
+</tr>
+</tbody></table>
+
+
+<blockquote>**综合评分 = Σ（因子得分 × 权重）**  ，满分 100 分</blockquote>
+
+<h4>权重配置面板</h4>
+
+<table>
+<tbody><tr>
+<th>配置项</th>
+<th>默认值</th>
+<th>范围</th>
+</tr>
+<tr>
+<td>总成本权重</td>
+<td>50%</td>
+<td>0-100%</td>
+</tr>
+<tr>
+<td>罚款风险权重</td>
+<td>25%</td>
+<td>0-100%</td>
+</tr>
+<tr>
+<td>数据置信度权重</td>
+<td>15%</td>
+<td>0-100%</td>
+</tr>
+<tr>
+<td>方案稳定性权重</td>
+<td>10%</td>
+<td>0-100%</td>
+</tr>
+<tr>
+<td>低风险缓冲阈值</td>
+<td>7 天</td>
+<td>1-30 天</td>
+</tr>
+<tr>
+<td>中风险缓冲阈值</td>
+<td>3 天</td>
+<td>1-30 天</td>
+</tr>
+</tbody></table>
+
+
+<hr>
+
+<h2>8. 结果展示与输出模块</h2>
+
+<h3>8.1 网页端仪表盘</h3>
+
+<table>
+<tbody><tr>
+<th>图表</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+<tr>
+<td>**总成本对比**</td>
+<td>堆叠柱状图</td>
+<td>各方案总成本并排对比，分色显示成本构成</td>
+</tr>
+<tr>
+<td>**综合评分雷达图**</td>
+<td>雷达图</td>
+<td>各方案在 4 个评分因子上的表现</td>
+</tr>
+<tr>
+<td>**时间-成本散点图**</td>
+<td>散点图</td>
+<td>各方案在"完成时间 vs 总成本"坐标上的位置</td>
+</tr>
+<tr>
+<td>**成本构成饼图**</td>
+<td>环形图</td>
+<td>单个方案的成本构成占比</td>
+</tr>
+</tbody></table>
+
+
+<h3>8.2 用户交互</h3>
+
+<ul><li>**数值调整**：用户可修改任意方案中的任意成本变量，系统实时重算总成本和综合评分</li><li>**新增方案**：用户可点击"添加方案"，选择零部件来源和运输组合，AI 自动填充成本</li><li>**方案存废**：用户可删除不满意的 AI 方案</li><li>**数据不回写**：所有修改仅影响当前分析，不回写历史数据库</li></ul>
+
+<h3>8.3 导出功能</h3>
+
+<table>
+<tbody><tr>
+<th>导出格式</th>
+<th>内容</th>
+</tr>
+<tr>
+<td>**PDF 报告**</td>
+<td>完整分析结果、图表、AI 推理过程、推荐结论、风险提示</td>
+</tr>
+<tr>
+<td>**Excel 文件**</td>
+<td>原始数据 + 各方案计算明细 + 对比表格</td>
+</tr>
+</tbody></table>
+
+
+<hr>
+
+<h2>9. 分析记录管理</h2>
+
+<table>
+<tbody><tr>
+<th>功能</th>
+<th>说明</th>
+</tr>
+<tr>
+<td>**自动保存**</td>
+<td>每次分析自动保存为一条记录</td>
+</tr>
+<tr>
+<td>**历史列表**</td>
+<td>按时间倒序展示所有历史分析，支持搜索和筛选</td>
+</tr>
+<tr>
+<td>**回看**</td>
+<td>完整还原当时的分析结果和 AI 推理</td>
+</tr>
+<tr>
+<td>**再次分析**</td>
+<td>基于历史记录的参数重新发起 AI 分析</td>
+</tr>
+<tr>
+<td>**删除**</td>
+<td>删除不需要的历史记录</td>
+</tr>
+</tbody></table>
+
+
+<hr>
+
+<h2>10. 非功能需求</h2>
+
+<table>
+<tbody><tr>
+<th>需求</th>
+<th>说明</th>
+</tr>
+<tr>
+<td>**安全性**</td>
+<td>API Key 加密存储；内网部署</td>
+</tr>
+<tr>
+<td>**性能**</td>
+<td>AI 分析响应时间目标 &lt; 60 秒</td>
+</tr>
+<tr>
+<td>**可扩展性**</td>
+<td>成本构成项可配置新增；AI 策略维度可扩展</td>
+</tr>
+<tr>
+<td>**多语言**</td>
+<td>界面支持中文/英文切换</td>
+</tr>
+<tr>
+<td>**审计日志**</td>
+<td>记录每次分析的输入参数、AI 生成的方案、填充值来源、最终推荐</td>
+</tr>
+</tbody></table>
+
+
+<hr>
+
+<h2>11. 工作流总览</h2>
+
+<pre><code>
+① 用户输入维修场景参数（风机信息 + 故障 + 罚款条款）
+                    │
+                    ▼
+② AI 理解场景 + 查询数据
+   ├─ 解析故障，确认零部件清单
+   ├─ 查询历史数据库 → 提取参考值
+   └─ 无数据 → 触发网络搜索 → 整合结果
+                    │
+                    ▼
+③ AI 自主生成方案（核心环节）
+   ├─ 按预置规则固定生成 5 个标准方案
+   ├─ 填充各方案成本数值，标记不可行方案
+   ├─ 应用台风季 buffer、时效敏感度等约束
+   └─ 展示方案生成推理过程
+                    │
+                    ▼
+④ 综合评分 + AI 推荐
+   总成本(50%) + 罚款风险(25%) + 置信度(15%)
+   + 稳定性(10%) = 综合评分 → 推荐最优方案
+                    │
+                    ▼
+⑤ 结果展示（仪表盘图表 + AI 推理说明）
+   用户可调整数值、增删方案 → 实时重算
+   导出 PDF / Excel
+</code></pre>
+
+<hr>
+
+<h2>12. 技术实现建议</h2>
+
+<table>
+<tbody><tr>
+<th>层面</th>
+<th>建议方案</th>
+</tr>
+<tr>
+<td>**前端框架**</td>
+<td>React</td>
+</tr>
+<tr>
+<td>**后端框架**</td>
+<td>Python FastAPI</td>
+</tr>
+<tr>
+<td>**数据库**</td>
+<td>PostgreSQL</td>
+</tr>
+<tr>
+<td>**AI 调用**</td>
+<td>统一抽象层，支持 Ollama SDK 和 OpenAI 兼容 API</td>
+</tr>
+<tr>
+<td>**网络搜索**</td>
+<td>后端通过搜索 API + LLM 提取结构化信息</td>
+</tr>
+<tr>
+<td>**图表**</td>
+<td>ECharts / Plotly.js</td>
+</tr>
+<tr>
+<td>**部署**</td>
+<td>Docker 容器化，内网服务器部署</td>
+</tr>
+</tbody></table>
+
+
+<hr>
+
+<p>*文档版本：v0.4 | 更新日期：2026-05-07 | 作者：宋晋宇*</p>
+
+<hr>
+
+<h2>附录：待继续完善的事项</h2>
+
+<ul><li>[ ] 历史 Excel 数据上线后，根据实际数据内容细化标准字段</li><li>[ ] 综合评分模型中各因子的默认权重，是否需要在试运行后根据实际案例调优？</li><li>[ ] 网络搜索是否需要限定特定网站白名单（如行业数据库、供应商官网）？</li><li>[ ] 前端技术栈和部署方式的最终选型</li><li>[ ] AI 自主生成方案的可解释性要求——推理过程需要多详细？</li></ul>
+
+<hr>
+
+<h2>13. 知识与规则沉淀 — 预置规则全集</h2>
+
+<h3>13.1 规则速览</h3>
+
+<table>
+<tbody><tr>
+<th>组</th>
+<th>规则数</th>
+<th>适用流程</th>
+<th>核心内容</th>
+</tr>
+<tr>
+<td>A</td>
+<td>24</td>
+<td>生成方案</td>
+<td>零部件成本、运输费用、管理费、基础运输天数</td>
+</tr>
+<tr>
+<td>B</td>
+<td>10</td>
+<td>生成方案</td>
+<td>国家时效敏感度罚款权重</td>
+</tr>
+<tr>
+<td>C</td>
+<td>6</td>
+<td>生成方案</td>
+<td>台风季天数 Buffer</td>
+</tr>
+<tr>
+<td>D</td>
+<td>6</td>
+<td>创建案例</td>
+<td>中位数聚合、异常值检测、等权处理、最小样本量</td>
+</tr>
+<tr>
+<td>**合计**</td>
+<td>**46**</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody></table>
+
+
+<h3>13.2 A 组：零部件采购与运输成本（24 条）</h3>
+
+<h4>A1. 零部件成本</h4>
+
+<table>
+<tbody><tr>
+<th>规则名称</th>
+<th>描述</th>
+<th>类型</th>
+<th>值</th>
+<th>优先级</th>
+</tr>
+<tr>
+<td>丹麦总部采购基准</td>
+<td>丹麦/欧洲为全球风电零部件高端制造中心，采购价为系统基准值</td>
+<td>倍数</td>
+<td>1.00</td>
+<td>10</td>
+</tr>
+<tr>
+<td>中国采购成本优势</td>
+<td>中国风机制造成本比西方同类低约 30%</td>
+<td>倍数</td>
+<td>0.70</td>
+<td>10</td>
+</tr>
+<tr>
+<td>发达市场本地采购溢价</td>
+<td>JP/KR/AU/NZ 本地风电零部件市场小、制造成本高</td>
+<td>倍数</td>
+<td>1.05</td>
+<td>8</td>
+</tr>
+<tr>
+<td>发展中市场本地采购折价</td>
+<td>CN/ID/PH/TH/VN/PK 本地采购低人力成本优势</td>
+<td>倍数</td>
+<td>0.90</td>
+<td>7</td>
+</tr>
+<tr>
+<td>新喀里多尼亚远程溢价</td>
+<td>NC 为法国海外领地，南太平洋偏远岛屿</td>
+<td>倍数</td>
+<td>1.30</td>
+<td>7</td>
+</tr>
+</tbody></table>
+
+
+<h4>A2. 运输费用 — 丹麦出发海运</h4>
+
+<table>
+<tbody><tr>
+<th>规则名称</th>
+<th>描述</th>
+<th>类型</th>
+<th>值</th>
+<th>优先级</th>
+</tr>
+<tr>
+<td>丹麦→东亚海运</td>
+<td>丹麦→JP/KR（航程 11,000-13,000 海里）</td>
+<td>倍数</td>
+<td>0.12</td>
+<td>9</td>
+</tr>
+<tr>
+<td>丹麦→东南亚海运</td>
+<td>丹麦→TH/VN/PH/ID（航程 12,000-15,000 海里）</td>
+<td>倍数</td>
+<td>0.14</td>
+<td>9</td>
+</tr>
+<tr>
+<td>丹麦→大洋洲海运</td>
+<td>丹麦→AU/NZ（航程 13,000-16,000 海里）</td>
+<td>倍数</td>
+<td>0.16</td>
+<td>9</td>
+</tr>
+<tr>
+<td>丹麦→巴基斯坦海运</td>
+<td>丹麦→PK（航程 8,000-10,000 海里）</td>
+<td>倍数</td>
+<td>0.11</td>
+<td>9</td>
+</tr>
+<tr>
+<td>丹麦→新喀里多尼亚海运</td>
+<td>丹麦→NC（航程 &gt; 16,000 海里）</td>
+<td>倍数</td>
+<td>0.18</td>
+<td>9</td>
+</tr>
+</tbody></table>
+
+
+<h4>A3. 运输费用 — 中国出发海运</h4>
+
+<table>
+<tbody><tr>
+<th>规则名称</th>
+<th>描述</th>
+<th>类型</th>
+<th>值</th>
+<th>优先级</th>
+</tr>
+<tr>
+<td>中国→东亚海运</td>
+<td>中国→JP/KR（约 500-1,200 海里）</td>
+<td>倍数</td>
+<td>0.04</td>
+<td>9</td>
+</tr>
+<tr>
+<td>中国→东南亚海运</td>
+<td>中国→TH/VN/PH/ID（约 1,500-3,500 海里）</td>
+<td>倍数</td>
+<td>0.06</td>
+<td>9</td>
+</tr>
+<tr>
+<td>中国→大洋洲海运</td>
+<td>中国→AU/NZ（约 4,500-6,000 海里）</td>
+<td>倍数</td>
+<td>0.10</td>
+<td>9</td>
+</tr>
+<tr>
+<td>中国→巴基斯坦运输</td>
+<td>中国→PK（海运或中巴经济走廊陆运）</td>
+<td>倍数</td>
+<td>0.05</td>
+<td>9</td>
+</tr>
+</tbody></table>
+
+
+<h4>A4. 运输费用 — 其他方式</h4>
+
+<table>
+<tbody><tr>
+<th>规则名称</th>
+<th>描述</th>
+<th>类型</th>
+<th>值</th>
+<th>优先级</th>
+</tr>
+<tr>
+<td>本地陆运成本</td>
+<td>本地采购+陆路运输至风场</td>
+<td>倍数</td>
+<td>0.03</td>
+<td>8</td>
+</tr>
+<tr>
+<td>空运相对海运费用倍数</td>
+<td>空运费用约为海运 6.5 倍</td>
+<td>倍数</td>
+<td>6.50</td>
+<td>9</td>
+</tr>
+<tr>
+<td>叶片空运不可行</td>
+<td>叶片长 70-85m 远超货机限制</td>
+<td>上限</td>
+<td>0</td>
+<td>10</td>
+</tr>
+</tbody></table>
+
+
+<h4>A5. 总部管理费</h4>
+
+<table>
+<tbody><tr>
+<th>规则名称</th>
+<th>描述</th>
+<th>类型</th>
+<th>值</th>
+<th>优先级</th>
+</tr>
+<tr>
+<td>丹麦总部管理费</td>
+<td>跨国风电制造商 intercompany 定价惯例 8-15%，取中位值</td>
+<td>倍数</td>
+<td>0.10</td>
+<td>10</td>
+</tr>
+<tr>
+<td>中国采购管理费</td>
+<td>中国子公司供亚太区使用，管理费显著低于丹麦</td>
+<td>倍数</td>
+<td>0.03</td>
+<td>8</td>
+</tr>
+<tr>
+<td>本地采购免管理费</td>
+<td>不经总部调拨，无管理费</td>
+<td>倍数</td>
+<td>0.00</td>
+<td>10</td>
+</tr>
+</tbody></table>
+
+
+<h4>A6. 基础运输天数</h4>
+
+<table>
+<tbody><tr>
+<th>规则名称</th>
+<th>描述</th>
+<th>类型</th>
+<th>值</th>
+<th>优先级</th>
+</tr>
+<tr>
+<td>丹麦海运基础天数</td>
+<td>→JP/KR 30d / →TH/VN/PH/ID 35d / →AU/NZ 40d / →PK 28d / →NC 45d</td>
+<td>加值</td>
+<td>按区域</td>
+<td>8</td>
+</tr>
+<tr>
+<td>中国海运基础天数</td>
+<td>→JP/KR 5d / →TH/VN/PH/ID 10d / →AU/NZ 18d / →PK 10d</td>
+<td>加值</td>
+<td>按区域</td>
+<td>8</td>
+</tr>
+<tr>
+<td>空运基础天数</td>
+<td>丹麦出发 5d / 中国出发 2d</td>
+<td>加值</td>
+<td>5/2 天</td>
+<td>8</td>
+</tr>
+<tr>
+<td>本地陆运基础天数</td>
+<td>全局中值</td>
+<td>加值</td>
+<td>3 天</td>
+<td>7</td>
+</tr>
+</tbody></table>
+
+
+<h3>13.3 B 组：国家时效敏感度（10 条）</h3>
+
+<table>
+<tbody><tr>
+<th>规则名称</th>
+<th>描述</th>
+<th>值</th>
+</tr>
+<tr>
+<td>日本最高时效敏感度</td>
+<td>日本民法第 420 条允许 penalty 与 LD 叠加</td>
+<td>1.30</td>
+</tr>
+<tr>
+<td>韩国高层时效敏感度</td>
+<td>合同执行力强，O&amp;M 合同多引入国际标准 SLA</td>
+<td>1.25</td>
+</tr>
+<tr>
+<td>澳新基准时效敏感度</td>
+<td>成熟普通法体系，LD 需满足 Dunlop 标准</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td>中国中等偏低时效敏感度</td>
+<td>全球最大风电市场，竞争激烈，协商空间较大</td>
+<td>0.85</td>
+</tr>
+<tr>
+<td>泰国中等时效敏感度</td>
+<td>法律体系受普通法和本地法双重影响</td>
+<td>0.90</td>
+</tr>
+<tr>
+<td>越南中等偏低时效敏感度</td>
+<td>《建设法 2025》LD 上限为违约义务价值的 8%</td>
+<td>0.80</td>
+</tr>
+<tr>
+<td>菲律宾中等偏低时效敏感度</td>
+<td>风电市场起步晚，台风频繁</td>
+<td>0.80</td>
+</tr>
+<tr>
+<td>印度尼西亚偏低时效敏感度</td>
+<td>风电市场早期，法律执行流程较长</td>
+<td>0.75</td>
+</tr>
+<tr>
+<td>巴基斯坦最低时效敏感度</td>
+<td>法律执行和合同保障体系相对薄弱</td>
+<td>0.70</td>
+</tr>
+<tr>
+<td>新喀里多尼亚基准时效敏感度</td>
+<td>法国海外领地，适用法国/欧盟法律框架</td>
+<td>1.00</td>
+</tr>
+</tbody></table>
+
+
+<h3>13.4 C 组：台风影响（6 条）</h3>
+
+<table>
+<tbody><tr>
+<th>规则名称</th>
+<th>描述</th>
+<th>值</th>
+</tr>
+<tr>
+<td>台风季峰值期海运 Buffer</td>
+<td>7/1-10/31，NW Pacific 全年约 70% TC</td>
+<td>+10 天</td>
+</tr>
+<tr>
+<td>台风季肩峰期海运 Buffer</td>
+<td>6 月、11 月 TC 仍活跃</td>
+<td>+5 天</td>
+</tr>
+<tr>
+<td>台风季低谷期免 Buffer</td>
+<td>12 月-次年 5 月 TC 极少</td>
+<td>0 天</td>
+</tr>
+<tr>
+<td>台风直接受影响区域</td>
+<td>CN/JP/KR/PH/VN/TH/TW</td>
+<td>标记规则</td>
+</tr>
+<tr>
+<td>台风间接影响区域</td>
+<td>ID/PK 峰值期 +3 天；AU/NZ/NC 不受影响</td>
+<td>+3 天</td>
+</tr>
+<tr>
+<td>台风季空运 Buffer</td>
+<td>峰值期 +3d / 肩峰期 +1d</td>
+<td>+3/+1 天</td>
+</tr>
+</tbody></table>
+
+
+<h3>13.5 D 组：历史数据处理（6 条）</h3>
+
+<table>
+<tbody><tr>
+<th>规则名称</th>
+<th>描述</th>
+<th>值</th>
+</tr>
+<tr>
+<td>同机型同部件价格取中位数</td>
+<td>中位数天然抗异常，更稳健反映典型价格</td>
+<td>中位数</td>
+</tr>
+<tr>
+<td>异常值检测 3×MAD</td>
+<td>偏离中位数超 3 倍 MAD 的记录标记异常</td>
+<td>3×MAD</td>
+</tr>
+<tr>
+<td>历史数据默认丹麦采购源</td>
+<td>数据无"采购源"列，默认丹麦采购</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td>运输成本异常检测</td>
+<td>低于丹麦海运规则值 60% 标记异常</td>
+<td>0.60</td>
+</tr>
+<tr>
+<td>无时间标签等权处理</td>
+<td>所有匹配记录等权处理</td>
+<td>等权</td>
+</tr>
+<tr>
+<td>最小样本量阈值</td>
+<td>≥10 正常 / 3-9 低样本 / &lt;3 不自动填值</td>
+<td>10/3</td>
+</tr>
+</tbody></table>
+
+
+</body></html>

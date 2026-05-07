@@ -126,6 +126,7 @@ class PlanCostItemSchema(BaseModel):
     id: int
     plan_id: int
     business_cost_category: str
+    cost_subtype: Optional[str] = None
     estimated_value: Optional[float] = None
     ai_reasoning: Optional[str] = None
 
@@ -140,7 +141,11 @@ class PlanSchema(BaseModel):
     plan_label: str
     total_cost_eur: Optional[float] = None
     total_duration_days: Optional[float] = None
+    penalty_amount_eur: Optional[float] = None
     comparison_rank: Optional[int] = None
+    composite_score: Optional[float] = None
+    is_feasible: int = 1
+    infeasibility_reason: Optional[str] = None
     ai_reasoning: Optional[str] = None
     cost_items: List[PlanCostItemSchema] = []
 

@@ -69,7 +69,11 @@ export interface PlanItem {
   plan_label: string
   total_cost_eur: number | null
   total_duration_days: number | null
+  penalty_amount_eur: number | null
   comparison_rank: number | null
+  composite_score: number | null
+  is_feasible: number
+  infeasibility_reason: string | null
   ai_reasoning: string | null
   cost_items: PlanCostItem[]
 }
@@ -78,6 +82,7 @@ export interface PlanCostItem {
   id: number
   plan_id: number
   business_cost_category: string
+  cost_subtype: string | null
   estimated_value: number | null
   ai_reasoning: string | null
 }

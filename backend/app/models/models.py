@@ -90,7 +90,11 @@ class Plan(Base):
     plan_label = Column(String, nullable=False)
     total_cost_eur = Column(Float, nullable=True)
     total_duration_days = Column(Float, nullable=True)
+    penalty_amount_eur = Column(Float, nullable=True)
     comparison_rank = Column(Integer, nullable=True)
+    composite_score = Column(Float, nullable=True)
+    is_feasible = Column(Integer, nullable=False, default=1)
+    infeasibility_reason = Column(String, nullable=True)
     ai_reasoning = Column(Text, nullable=True)
     created_at = Column(String, nullable=False, default=lambda: datetime.now().isoformat())
 
@@ -104,6 +108,7 @@ class PlanCostItem(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     plan_id = Column(Integer, ForeignKey("plans.id", ondelete="CASCADE"), nullable=False)
     business_cost_category = Column(String, nullable=False)
+    cost_subtype = Column(String, nullable=True)
     estimated_value = Column(Float, nullable=True)
     ai_reasoning = Column(Text, nullable=True)
     created_at = Column(String, nullable=False, default=lambda: datetime.now().isoformat())
@@ -147,3 +152,14 @@ class AIConfig(Base):
     temperature = Column(Float, nullable=False, default=0.3)
     top_p = Column(Float, nullable=False, default=0.9)
     max_tokens = Column(Integer, nullable=False, default=4096)
+
+
+class ScoringWeight(Base):
+    __tablename__ = "scoring_weights"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    factor_name = Column(String, nullable=False, unique=True)
+    factor_label = Column(String, nullable=False)
+    weight = Column(Float, nullable=False)
+    low_risk_buffer_days = Column(Integer, nullable=False, default=7)
+    medium_risk_buffer_days = Column(Integer, nullable=False, default=3)

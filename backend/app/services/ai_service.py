@@ -280,3 +280,70 @@ CostGroup → 业务成本映射:
                     raise
                 continue
         return {"plans": []}
+
+    async def infer_plans_validate(
+        self, case_data: dict, engine_plans: list[dict], rules: list[dict], engineer_notes: str = ""
+    ) -> dict:
+        messages = self.build_plan_validation_prompt(case_data, engine_plans, rules, engineer_notes)
+        for attempt in range(settings.max_retries + 1):
+            try:
+                response_text = await self.chat(messages)
+                json_start = response_text.find("{")
+                json_end = response_text.rfind("}") + 1
+                if json_start >= 0 and json_end > json_start:
+                    return json.loads(response_text[json_start:json_end])
+            except (json.JSONDecodeError, Exception):
+                if attempt == settings.max_retries:
+                    raise
+                continue
+        return {"plans": []}
+
+    def build_plan_validation_prompt(
+        self, case_data: dict, engine_plans: list[dict], rules: list[dict], engineer_notes: str = ""
+    ) -> list[dict]:
+        plans_json = json.dumps([{
+            "plan_label": p.get("plan_label", ""),
+            "total_cost_eur": p.get("total_cost_eur"),
+            "total_duration_days": p.get("total_duration_days"),
+            "penalty_amount_eur": p.get("penalty_amount_eur"),
+            "total_with_penalty_eur": p.get("total_with_penalty_eur"),
+            "is_feasible": p.get("is_feasible"),
+            "infeasibility_reason": p.get("infeasibility_reason", ""),
+            "items": [{"business_cost_category": it.get("business_cost_category"),
+                       "estimated_value": it.get("estimated_value")}
+                      for it in p.get("items", [])],
+        } for p in engine_plans], ensure_ascii=False, indent=2)
+
+        rules_text = "\n".join([
+            f"- [{r.get('scope', 'global')}] {r.get('name', '')}: {r.get('description', '')}"
+            for r in rules
+        ]) if rules else "无"
+
+        system_prompt = """你是风电运维物流方案评审专家。规则引擎已经根据业务规则计算出5个方案的成本。
+请做以下工作：
+1. 校验各方案数值是否合理，标注异常项
+2. 为每个方案的每个成本项补充自然语言推理说明
+3. 对不可行方案确认原因
+4. 输出仍需为严格JSON。"""
+
+        user_prompt = f"""案例信息：
+- 风机型号: {case_data.get('turbine_model', '')}
+- 国家: {case_data.get('country', '')}
+- 故障部件: {case_data.get('component', '')}
+- 规定维修时长(小时): {case_data.get('repair_duration_hours', 0)}
+- 每日罚款额(EUR): {case_data.get('penalty_amount_eur', 0)}
+- 工程师补充: {engineer_notes or '无'}
+
+规则引擎预计算结果:
+{plans_json}
+
+活跃规则:
+{rules_text}
+
+请为每个方案补充 reasoning 和 items[].reasoning 后输出。格式：
+{{"plans": [{{"plan_label":"方案1","reasoning":"整体分析...","composite_score":85,"items":[{{"business_cost_category":"零部件成本","reasoning":"..."}}]}}]}}
+只输出JSON。"""
+        return [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]

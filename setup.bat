@@ -46,7 +46,7 @@ where ollama >nul 2>&1
 if %errorlevel% neq 0 (
     echo   [警告] 未检测到 Ollama 命令行
     echo   如尚未安装，请访问 https://ollama.com 下载安装
-    echo   安装后运行: ollama pull qwen2.5:14b
+    echo   安装后运行: ollama pull qwen2.5:7b
 ) else (
     for /f "tokens=*" %%v in ('ollama -v 2^>^&1') do echo   [√] %%v
     
@@ -134,7 +134,7 @@ echo ║           http://localhost:5173                      ║
 echo ╠══════════════════════════════════════════════════════╣
 echo ║  首次使用前请确保:                                    ║
 echo ║  1. Ollama 已安装并运行                               ║
-echo ║  2. 运行: ollama pull qwen2.5:14b                    ║
+echo ║  2. 运行: ollama pull qwen2.5:7b                     ║
 echo ╚══════════════════════════════════════════════════════╝
 echo.
 

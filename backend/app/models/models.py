@@ -143,7 +143,7 @@ class AIConfig(Base):
 
     id = Column(Integer, primary_key=True)
     ollama_base_url = Column(String, nullable=False, default="http://localhost:11434")
-    model_name = Column(String, nullable=False, default="qwen2.5:14b")
+    model_name = Column(String, nullable=False, default="qwen2.5:7b")
     temperature = Column(Float, nullable=False, default=0.3)
     top_p = Column(Float, nullable=False, default=0.9)
     max_tokens = Column(Integer, nullable=False, default=4096)

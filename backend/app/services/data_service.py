@@ -9,6 +9,29 @@ from app.models.models import RawCostRecord, CostGroupMapping
 
 class DataService:
 
+    async def _auto_build_mappings(self, db: AsyncSession):
+        from sqlalchemy import distinct
+        result = await db.execute(select(distinct(RawCostRecord.cost_group)))
+        cost_groups = [r[0] for r in result.all() if r[0]]
+        result = await db.execute(select(CostGroupMapping.cost_group_value))
+        existing = set(r[0] for r in result.all())
+        default_map = {
+            "parts": "零部件成本", "spare": "零部件成本",
+            "crane": "吊车成本", "freight": "运输费用", "transport": "运输费用",
+            "labour": "人力成本", "labor": "人力成本", "tools": "工具费用",
+            "other": "其他费用",
+        }
+        for cg in cost_groups:
+            if cg in existing:
+                continue
+            bc = "其他费用"
+            for key, val in default_map.items():
+                if key in cg.lower():
+                    bc = val
+                    break
+            db.add(CostGroupMapping(cost_group_value=cg, business_cost_category=bc, is_user_defined=0))
+        await db.flush()
+
     async def upload_csv(self, db: AsyncSession, file_bytes: bytes, filename: str) -> dict:
         if filename.endswith(".xlsx") or filename.endswith(".xls"):
             df = pd.read_excel(BytesIO(file_bytes))
@@ -58,6 +81,7 @@ class DataService:
             db.add(record)
 
         await db.commit()
+        await self._auto_build_mappings(db)
         return {"batch_id": batch_id, "row_count": len(df)}
 
     async def get_records(
@@ -208,4 +232,86 @@ class DataService:
             "cost_group_stats": stats,
             "platform": platform,
             "component": component,
+        }
+
+    async def compute_statistical_costs(
+        self, db: AsyncSession, platform: str, component: str, mappings: list
+    ) -> dict:
+        import statistics
+
+        mapping_dict = {}
+        for m in mappings:
+            cg_val = m.cost_group_value if hasattr(m, 'cost_group_value') else m.get('cost_group_value', '')
+            bc = m.business_cost_category if hasattr(m, 'business_cost_category') else m.get('business_cost_category', '')
+            if cg_val and bc:
+                mapping_dict[cg_val] = bc
+
+        query = select(RawCostRecord)
+        if platform:
+            query = query.where(RawCostRecord.platform == platform)
+        if component:
+            query = query.where(RawCostRecord.component == component)
+        result = await db.execute(query)
+        records = result.scalars().all()
+
+        fallback = False
+        if not records:
+            fallback = True
+            result = await db.execute(select(RawCostRecord))
+            records = result.scalars().all()
+
+        cost_group_values = {}
+        for r in records:
+            cg = r.cost_group
+            if cg not in cost_group_values:
+                cost_group_values[cg] = []
+            eur_val = r.transfer_price_eur_net_incl_claim_sum or r.transfer_price_eur_sum or r.cost_per_unit or 0
+            if eur_val > 0:
+                cost_group_values[cg].append(eur_val)
+
+        category_values = {}
+        category_counts = {}
+        category_details = {}
+
+        for cg, vals in cost_group_values.items():
+            bc = mapping_dict.get(cg, "其他费用")
+            if bc not in category_values:
+                category_values[bc] = []
+                category_counts[bc] = 0
+                category_details[bc] = []
+            median_val = statistics.median(vals) if vals else 0
+            category_values[bc].append(median_val)
+            category_counts[bc] += len(vals)
+            category_details[bc].append({
+                "cost_group": cg, "count": len(vals),
+                "median": round(median_val, 2),
+                "mean": round(statistics.mean(vals), 2),
+            })
+
+        items = []
+        total = 0.0
+        for cat in ["零部件成本", "吊车成本", "运输费用", "人力成本", "工具费用", "其他费用"]:
+            if cat in category_values:
+                s = round(sum(category_values[cat]), 2)
+                count = category_counts[cat]
+                confidence = 0.85 if count >= 10 else (0.6 if count >= 3 else 0.3)
+                reasoning = f"统计计算: {'全局' if fallback else 'Platform+Component'}匹配 {count} 条。" + \
+                    "; ".join([f"{d['cost_group']}(n={d['count']},中位数={d['median']})" for d in category_details[cat]])
+                items.append({
+                    "business_cost_category": cat, "estimated_value": s,
+                    "confidence": confidence, "reasoning": reasoning,
+                    "source_record_count": count,
+                })
+                total += s
+
+        items.append({
+            "business_cost_category": "总成本合计",
+            "estimated_value": round(total, 2), "confidence": 1.0,
+            "reasoning": f"统计计算: 以上各项合计",
+            "source_record_count": len(records),
+        })
+
+        return {
+            "items": items, "total_estimated_cost": round(total, 2),
+            "fallback": fallback, "total_matched_records": len(records),
         }

@@ -176,11 +176,25 @@ async def infer_costs(case_id: int, db: AsyncSession = Depends(get_db)):
         yield f"data: {json.dumps({'type': 'progress', 'message': f'匹配到 {matched_count} 条相似记录'})}\n\n"
         yield f"data: {json.dumps({'type': 'progress', 'message': '正在调用AI模型推断成本...'})}\n\n"
 
+        use_stat = False
         try:
             ai_result = await ai_service.infer_case_costs(case_dict, historical_stats, mappings, rules_dicts)
+            items = ai_result.get("items", [])
+            if not items:
+                yield f"data: {json.dumps({'type': 'progress', 'message': 'AI返回为空，降级为统计计算'})}\n\n"
+                use_stat = True
         except Exception as e:
-            yield f"data: {json.dumps({'type': 'error', 'message': f'AI推理失败: {str(e)}'})}\n\n"
-            return
+            yield f"data: {json.dumps({'type': 'progress', 'message': f'AI调用失败({str(e)[:80]})，降级为统计计算'})}\n\n"
+            use_stat = True
+
+        if use_stat:
+            stat_result = await data_service.compute_statistical_costs(
+                db, case.platform or "", case.component or "", mappings
+            )
+            items = stat_result.get("items", [])
+            total_rec = stat_result.get("total_matched_records", 0)
+            msg = f'统计计算完成 ({total_rec} 条记录)'
+            yield f"data: {json.dumps({'type': 'progress', 'message': msg})}\n\n"
 
         await db.execute(
             select(CaseCostItem).where(CaseCostItem.case_id == case_id)

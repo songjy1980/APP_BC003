@@ -7,6 +7,7 @@ from app.api.data import router as data_router
 from app.api.cases import router as cases_router
 from app.api.rules import router as rules_router
 from app.api.ai import router as ai_router
+from app.api.config import router as config_router
 from app.models.models import AIConfig, SiteCountryMap, Rule, ScoringWeight
 
 
@@ -99,6 +100,7 @@ app.include_router(data_router)
 app.include_router(cases_router)
 app.include_router(rules_router)
 app.include_router(ai_router)
+app.include_router(config_router)
 
 
 @app.get("/")

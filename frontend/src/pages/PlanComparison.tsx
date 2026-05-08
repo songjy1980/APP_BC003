@@ -5,7 +5,7 @@ import {
 } from 'antd'
 import {
   TrophyOutlined, ArrowLeftOutlined, DownloadOutlined, ReloadOutlined,
-  CloseCircleOutlined,
+  CloseCircleOutlined, DashboardOutlined,
 } from '@ant-design/icons'
 import { useCaseStore } from '../stores/caseStore'
 import type { PlanItem } from '../types'
@@ -117,6 +117,12 @@ export default function PlanComparison() {
         <Button icon={<DownloadOutlined />} onClick={handleExport} disabled={!currentPlans.length}>
           导出 CSV
         </Button>
+        {rankedPlans.length > 0 && (
+          <Button icon={<DashboardOutlined />} type="primary"
+                  onClick={() => navigate(`/cases/${id}/dashboard`)}>
+            查看仪表盘
+          </Button>
+        )}
         {rankedPlans.length > 0 && <Text type="secondary">{rankedPlans.length} 个方案</Text>}
       </Space>
 

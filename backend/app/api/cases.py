@@ -8,7 +8,7 @@ import json
 import asyncio
 
 from app.db.database import get_db
-from app.models.models import Case, CaseCostItem, Plan, PlanCostItem, Rule, CostGroupMapping
+from app.models.models import Case, CaseCostItem, Plan, PlanCostItem, Rule, CostGroupMapping, ScoringWeight
 from app.schemas.schemas import CaseCreateSchema, CostReviewSchema
 from app.services.data_service import DataService
 from app.services.ai_service import AIInferenceService
@@ -327,7 +327,17 @@ async def generate_plans(case_id: int, db: AsyncSession = Depends(get_db)):
 
         confidences = [ci.get("confidence", 0.5) or 0.5 for ci in cost_items_dicts]
         avg_conf = sum(confidences) / len(confidences) if confidences else 0.5
-        plans_data = engine.compute_all_scores(plans_data, avg_conf)
+
+        scoring_result = await db.execute(select(ScoringWeight).order_by(ScoringWeight.id))
+        scoring_weights = scoring_result.scalars().all()
+        weights_dict = {}
+        for sw in scoring_weights:
+            weights_dict[sw.factor_name] = {"weight": sw.weight, "label": sw.factor_label}
+        engine_weights = {
+            w.factor_name: w.weight for w in scoring_weights
+        }
+
+        plans_data = engine.compute_all_scores(plans_data, avg_conf, engine_weights)
         plans_data.sort(key=lambda p: -(p.get("composite_score", 0)))
         for i, p in enumerate(plans_data):
             p["comparison_rank"] = i + 1

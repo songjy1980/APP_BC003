@@ -162,11 +162,24 @@ class RuleEngine:
         }
 
     def compute_all_scores(self, plans: list[dict], confidence_avg: float, weights: Optional[dict] = None) -> list[dict]:
-        all_costs = [p.get("total_with_penalty_eur", 0) or 0 for p in plans]
+        feasible = [p for p in plans if p.get("is_feasible")]
+        if feasible:
+            avg_cost = sum(p.get("total_with_penalty_eur", 0) or 0 for p in feasible) / len(feasible)
+            for plan in plans:
+                if plan.get("is_feasible") and (plan.get("total_with_penalty_eur", 0) or 0) > avg_cost * 2:
+                    plan["is_feasible"] = False
+                    plan["infeasibility_reason"] = f"总成本 €{plan.get('total_with_penalty_eur', 0):,.2f} 超出其他可行方案均值 €{avg_cost:,.2f} 的 2 倍，经济上不可行"
+                    plan["composite_score"] = None
+
+        scoring_plans = [p for p in plans if p.get("is_feasible")]
+        all_costs = [(p.get("total_with_penalty_eur", 0) or 0) for p in scoring_plans] if scoring_plans else [0]
         min_c = min(all_costs) if all_costs else 1
         max_c = max(all_costs) if all_costs else 1e9
         for plan in plans:
-            plan["composite_score"] = self._score_one(plan, confidence_avg, min_c, max_c, weights)
+            if plan.get("is_feasible"):
+                plan["composite_score"] = self._score_one(plan, confidence_avg, min_c, max_c, weights)
+            else:
+                plan["composite_score"] = None
         return plans
 
     def _score_one(self, plan: dict, confidence_avg: float, min_cost: float, max_cost: float, weights: Optional[dict] = None) -> float:

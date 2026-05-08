@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  Card, Button, Typography, Space, Select, Row, Col, Alert, Collapse, Tag, Progress, Spin,
+  Card, Button, Typography, Space, Select, Row, Col, Alert, Collapse, Tag, Progress, Spin, Divider, Table,
 } from 'antd'
 import {
   ArrowLeftOutlined, TrophyOutlined, WarningOutlined, DownloadOutlined,
@@ -45,20 +45,19 @@ export default function Dashboard() {
   }, [id])
 
   const rankedPlans = useMemo(() => [...currentPlans].sort((a, b) => (a.comparison_rank || 99) - (b.comparison_rank || 99)), [currentPlans])
-  const bestPlan = rankedPlans[0]
+  const feasiblePlans = useMemo(() => rankedPlans.filter(p => p.is_feasible !== 0), [rankedPlans])
+  const excludedPlans = useMemo(() => rankedPlans.filter(p => p.is_feasible === 0), [rankedPlans])
+  const bestPlan = feasiblePlans[0]
 
   const barData = useMemo(() => {
-    return rankedPlans.map((p) => {
+    return feasiblePlans.map((p) => {
       const row: any = { name: p.plan_label?.replace(/方案\d[：:]/, '') }
-      const items = p.cost_items || []
-      for (const it of items) {
-        if (it.business_cost_category !== '总成本（含罚款）') {
-          row[it.business_cost_category] = it.estimated_value || 0
-        }
+      for (const it of (p.cost_items || [])) {
+        if (it.business_cost_category !== '总成本（含罚款）') row[it.business_cost_category] = it.estimated_value || 0
       }
       return row
     })
-  }, [rankedPlans])
+  }, [feasiblePlans])
 
   const radarData = useMemo(() => {
     if (!bestPlan) return []
@@ -71,35 +70,26 @@ export default function Dashboard() {
   }, [bestPlan])
 
   const scatterData = useMemo(() => {
-    return rankedPlans
-      .filter((p) => p.is_feasible)
-      .map((p, i) => ({
-        x: p.total_duration_days || 0,
-        y: p.total_cost_eur || 0,
-        z: p.composite_score || 50,
-        name: p.plan_label?.replace(/方案\d[：:]/, ''),
-        fill: COLORS[i],
-      }))
-  }, [rankedPlans])
+    return feasiblePlans.map((p, i) => ({
+      x: p.total_duration_days || 0, y: p.total_cost_eur || 0, z: p.composite_score || 50,
+      name: p.plan_label?.replace(/方案\d[：:]/, ''), fill: COLORS[i],
+    }))
+  }, [feasiblePlans])
 
   const pieData = useMemo(() => {
-    const p = selectedPlan ? rankedPlans.find((pl) => pl.plan_type === selectedPlan) : bestPlan
+    const p = selectedPlan ? feasiblePlans.find((pl) => pl.plan_type === selectedPlan) : bestPlan
     if (!p || !p.cost_items) return []
-    return (p.cost_items || [])
-      .filter((it) => it.business_cost_category !== '总成本（含罚款）')
-      .map((it) => ({
-        name: it.business_cost_category,
-        value: it.estimated_value || 0,
-      }))
-  }, [rankedPlans, selectedPlan, bestPlan])
+    return (p.cost_items || []).filter(it => it.business_cost_category !== '总成本（含罚款）')
+      .map(it => ({ name: it.business_cost_category, value: it.estimated_value || 0 }))
+  }, [feasiblePlans, selectedPlan, bestPlan])
 
   const barCategories = useMemo(() => {
     const cats = new Set<string>()
-    rankedPlans.forEach((p) => (p.cost_items || []).forEach((it) => {
+    feasiblePlans.forEach((p) => (p.cost_items || []).forEach(it => {
       if (it.business_cost_category !== '总成本（含罚款）') cats.add(it.business_cost_category)
     }))
     return Array.from(cats)
-  }, [rankedPlans])
+  }, [feasiblePlans])
 
   if (loading) {
     return <Spin tip="加载中..."><div style={{ padding: 100 }} /></Spin>
@@ -140,6 +130,12 @@ export default function Dashboard() {
 
       <Title level={4}>可视化仪表盘 {currentCase && <Text type="secondary">— {currentCase.case_name}</Text>}</Title>
 
+      {excludedPlans.length > 0 && (
+        <Alert type="warning" showIcon style={{ marginBottom: 16 }}
+          message={<span>共 {feasiblePlans.length} 个可行方案参与对比。{excludedPlans.map(p => `方案 "${p.plan_label}"（€${(p.total_cost_eur || 0).toLocaleString()}）${p.infeasibility_reason}`).join('；')}，未在图表中展示。详情请查看方案对比表。</span>}
+        />
+      )}
+
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={12}>
           <Card title="📊 总成本对比 — 堆叠柱状图" size="small">
@@ -165,7 +161,7 @@ export default function Dashboard() {
                 <PolarGrid />
                 <PolarAngleAxis dataKey="factor" fontSize={12} />
                 <PolarRadiusAxis angle={30} domain={[0, 100]} fontSize={10} />
-                {rankedPlans.filter((p) => p.is_feasible).map((p, i) => (
+                {feasiblePlans.map((p, i) => (
                   <Radar key={p.id} name={p.plan_label?.replace(/方案\d[：:]/, '')} dataKey="value"
                          stroke={COLORS[i]} fill={COLORS[i]} fillOpacity={0.15} />
                 ))}
@@ -173,7 +169,7 @@ export default function Dashboard() {
             </ResponsiveContainer>
             <div style={{ textAlign: 'center', marginTop: -24 }}>
               <Space>
-                {rankedPlans.filter((p) => p.is_feasible).map((p, i) => (
+                {feasiblePlans.map((p, i) => (
                   <Tag key={p.id} color={COLORS[i]}>{p.plan_label?.replace(/方案\d[：:]/, '')}</Tag>
                 ))}
               </Space>
@@ -207,7 +203,7 @@ export default function Dashboard() {
                   <Select size="small" value={selectedPlan || bestPlan?.plan_type || ''}
                           style={{ width: 160 }}
                           onChange={(v) => setSelectedPlan(v)}
-                          options={rankedPlans.filter((p) => p.is_feasible).map((p) => ({
+                          options={feasiblePlans.map((p) => ({
                             label: p.plan_label?.replace(/方案\d[：:]/, ''), value: p.plan_type,
                           }))}
                   />
@@ -229,42 +225,43 @@ export default function Dashboard() {
 
       {bestPlan && (
         <Card style={{ marginTop: 16 }} title={
-          <Space>
-            <TrophyOutlined style={{ color: '#059669' }} />
-            <span>🏆 AI 推荐结论 — {bestPlan.plan_label}</span>
-          </Space>
+          <Space><TrophyOutlined style={{ color: '#059669' }} /><span>🏆 AI 推荐结论 — {bestPlan.plan_label}</span></Space>
         }>
           <Row gutter={16}>
-            <Col span={8}>
+            <Col span={12}>
               <Text strong>推荐理由</Text>
               <Paragraph style={{ marginTop: 4, fontSize: 13 }}>
                 {bestPlan.ai_reasoning || `该方案综合评分 ${bestPlan.composite_score} 分，排名第 ${bestPlan.comparison_rank}，为最优方案。`}
               </Paragraph>
-              <Progress percent={Math.round(bestPlan.composite_score || 0)} strokeColor="#059669" size="small" format={(p) => `${p} 分`} />
+              <Progress percent={Math.round(bestPlan.composite_score || 0)} strokeColor="#059669" size="small" format={p => `${p} 分`} />
             </Col>
-            <Col span={8}>
+            <Col span={6}>
               <Text strong>关键风险</Text>
               {bestPlan.penalty_amount_eur != null && bestPlan.penalty_amount_eur > 0 ? (
                 <Alert type="warning" message={`预计罚款 €${bestPlan.penalty_amount_eur.toLocaleString()}`} style={{ marginTop: 4, fontSize: 12 }} />
-              ) : (
-                <Alert type="success" message="无罚款风险" style={{ marginTop: 4, fontSize: 12 }} />
-              )}
+              ) : <Alert type="success" message="无罚款风险" style={{ marginTop: 4, fontSize: 12 }} />}
             </Col>
-            <Col span={8}>
+            <Col span={6}>
               <Text strong>方案概况</Text>
               <Paragraph style={{ marginTop: 4, fontSize: 13 }}>
                 总成本: €{bestPlan.total_cost_eur?.toLocaleString()}<br />
                 预计天数: {bestPlan.total_duration_days} 天<br />
+                罚款: €{(bestPlan.penalty_amount_eur || 0).toLocaleString()}<br />
                 可行: {bestPlan.is_feasible ? '✅' : `❌ ${bestPlan.infeasibility_reason}`}
               </Paragraph>
             </Col>
           </Row>
 
-          {bestPlan.ai_reasoning && (
-            <Collapse size="small" style={{ marginTop: 8 }}
-                      items={[{ key: 'detail', label: '📝 AI 推理过程', children: <Paragraph style={{ fontSize: 12, whiteSpace: 'pre-wrap' }}>{bestPlan.ai_reasoning}</Paragraph> }]}
-            />
-          )}
+          <Divider style={{ margin: '12px 0' }} />
+          <Text strong>📊 方案速览对比矩阵</Text>
+          <Table size="small" pagination={false} style={{ marginTop: 8 }} dataSource={feasiblePlans} rowKey="id" columns={[
+            { title: '方案', dataIndex: 'plan_label', width: 140, render: (v: string) => v?.replace(/方案\d[：:]/, '') },
+            { title: '总成本', dataIndex: 'total_cost_eur', align: 'right' as const, render: (v: number) => `€${v?.toLocaleString()}` },
+            { title: '完成天数', dataIndex: 'total_duration_days', align: 'center' as const },
+            { title: '罚款', dataIndex: 'penalty_amount_eur', align: 'right' as const, render: (v: number) => v ? `€${v.toLocaleString()}` : '€0' },
+            { title: '评分', dataIndex: 'composite_score', align: 'center' as const, render: (v: number) => v != null ? `${Math.round(v)}分` : 'N/A' },
+            { title: '排名', dataIndex: 'comparison_rank', align: 'center' as const },
+          ]} />
         </Card>
       )}
     </div>

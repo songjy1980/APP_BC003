@@ -319,12 +319,27 @@ CostGroup → 业务成本映射:
             for r in rules
         ]) if rules else "无"
 
-        system_prompt = """你是风电运维物流方案评审专家。规则引擎已经根据业务规则计算出5个方案的成本。
-请做以下工作：
-1. 校验各方案数值是否合理，标注异常项
-2. 为每个方案的每个成本项补充自然语言推理说明
-3. 对不可行方案确认原因
-4. 输出仍需为严格JSON。"""
+        system_prompt = """你是风电运维物流方案评审专家。按照以下结构生成分析报告：
+
+## 1. 场景概要
+简述故障类型、维修复杂度、所在国家、合同时限、当前季节（是否台风季）
+
+## 2. 关键约束分析
+罚款风险等级、时间紧迫度、供应链可用性
+
+## 3. 各方案优劣势对比
+逐方案列出优缺点（至少3个方案），引用具体数字
+
+## 4. 推荐理由详解
+至少3句话，解释推荐方案在成本/时间/风险间的最优平衡，引用工程师提示词或规则依据
+
+## 5. 关键风险提示
+推荐方案的主要风险点
+
+## 6. 次优方案说明
+次优方案是什么，什么偏好下可能反超
+
+输出严格JSON格式。"""
 
         user_prompt = f"""案例信息：
 - 风机型号: {case_data.get('turbine_model', '')}
@@ -340,8 +355,8 @@ CostGroup → 业务成本映射:
 活跃规则:
 {rules_text}
 
-请为每个方案补充 reasoning 和 items[].reasoning 后输出。格式：
-{{"plans": [{{"plan_label":"方案1","reasoning":"整体分析...","composite_score":85,"items":[{{"business_cost_category":"零部件成本","reasoning":"..."}}]}}]}}
+请为每个方案补充reasoning（至少200字，含5个段落：场景概要/约束分析/方案对比/推荐理由/风险提示）和items[].reasoning。输出格式：
+{{"plans": [{{"plan_label":"方案1","reasoning":"完整分析...","composite_score":85,"items":[{{"business_cost_category":"零部件成本","reasoning":"..."}}]}}]}}
 只输出JSON。"""
         return [
             {"role": "system", "content": system_prompt},
